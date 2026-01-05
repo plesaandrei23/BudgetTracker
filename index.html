@@ -4,144 +4,184 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>Budget Pro Mobile</title>
+    <title>Budget Pro Responsive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Fundal extins pentru a acoperi tot ecranul pe mobil */
-        html { background-color: #0f172a; height: 100%; }
-        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; height: 100%; }
+        /* CSS Reset & Scrollbar */
+        * { -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         
+        /* Background diferit PC vs Mobil */
+        body { 
+            background-color: #e2e8f0; /* Gri pe PC */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Containerul Principal (Telefonul Virtual) */
+        #app-container {
+            width: 100%;
+            height: 100%;
+            background-color: #f8fafc;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Doar pe Desktop: Fa-l sa arate ca un telefon */
+        @media (min-width: 640px) {
+            #app-container {
+                max-width: 420px;
+                height: 90vh;
+                max-height: 900px;
+                border-radius: 40px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #0f172a;
+            }
+        }
+
+        /* Scroll Area */
+        #scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            /* Ascunde scrollbar dar permite scroll */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        #scroll-content::-webkit-scrollbar { display: none; }
+
         .hidden { display: none !important; }
         
-        /* Butoane tactile mai mari pentru mobil */
-        .touch-btn { min-height: 44px; }
-        
         /* Animatii */
-        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="pb-24 text-slate-800">
+<body>
 
-    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white p-6 hidden">
-        <i class="fa-solid fa-cloud text-6xl text-blue-500 mb-6"></i>
-        <h1 class="text-3xl font-bold mb-2">Budget Pro</h1>
-        <p class="text-slate-400 mb-8 text-center">Login pentru sincronizare</p>
-        <button id="googleLoginBtn" class="bg-white text-slate-900 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 active:scale-95 transition w-full justify-center max-w-xs">
-            <i class="fa-brands fa-google text-red-500 text-xl"></i> Continuă cu Google
-        </button>
-    </div>
-
-    <div id="appScreen" class="hidden">
+    <div id="app-container">
         
-        <div class="bg-slate-900 text-white pt-[max(20px,env(safe-area-inset-top))] pb-8 px-6 rounded-b-[2.5rem] shadow-xl mb-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full mix-blend-overlay filter blur-[60px] opacity-20 pointer-events-none"></div>
-            
-            <div class="flex justify-between items-center mb-6 mt-2 relative z-10">
-                <h1 class="text-xl font-bold tracking-tight">Budget Pro</h1>
+        <div id="loginScreen" class="absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white p-6 hidden">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-wallet text-4xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-2 tracking-tight">Budget Pro</h1>
+            <p class="text-slate-400 mb-10 text-center">Gestionează-ți banii inteligent</p>
+            <button id="googleLoginBtn" class="bg-white text-slate-900 px-8 py-4 rounded-2xl font-bold flex items-center gap-3 active:scale-95 transition shadow-xl w-full max-w-xs justify-center">
+                <i class="fa-brands fa-google text-red-500 text-xl"></i> Continuă cu Google
+            </button>
+        </div>
+
+        <div id="appHeader" class="bg-slate-900 text-white pt-[max(20px,env(safe-area-inset-top))] pb-6 px-6 relative shrink-0 hidden z-20 rounded-b-[2rem] shadow-xl">
+             <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600 rounded-full mix-blend-overlay filter blur-[60px] opacity-20 pointer-events-none"></div>
+
+            <div class="flex justify-between items-center mb-6 mt-4">
+                <div class="flex items-center gap-3">
+                    <img id="userPhoto" src="" class="w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Salut,</p>
+                        <p id="userName" class="text-sm font-bold leading-none">User</p>
+                    </div>
+                </div>
                 
-                <div class="flex gap-3">
-                    <button onclick="exportData()" class="bg-white/10 w-10 h-10 rounded-xl active:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Backup">
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition backdrop-blur-md">
                         <i class="fa-solid fa-cloud-arrow-down"></i>
                     </button>
-                    <button onclick="toggleSettings()" class="bg-white/10 w-10 h-10 rounded-xl active:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Setări">
+                    <button onclick="toggleSettings()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition backdrop-blur-md">
                         <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex justify-between items-end mb-6 relative z-10">
+            <div class="flex items-end justify-between">
                 <div>
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Balanță Totală</p>
-                    <p class="text-4xl font-extrabold tracking-tight" id="balance">...</p>
+                    <p class="text-3xl font-extrabold tracking-tight" id="balance">0.00 Lei</p>
                 </div>
-                <div class="text-right space-y-1">
-                    <div class="flex items-center justify-end gap-2 text-emerald-400">
-                        <i class="fa-solid fa-arrow-down text-xs"></i><span class="font-bold text-lg" id="totalIncome">0</span>
+                <div class="flex flex-col gap-1 text-right">
+                    <div class="flex items-center justify-end gap-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <i class="fa-solid fa-arrow-down text-emerald-400 text-xs"></i>
+                        <span class="font-bold text-emerald-400 text-sm" id="totalIncome">0</span>
                     </div>
-                    <div class="flex items-center justify-end gap-2 text-rose-400">
-                        <i class="fa-solid fa-arrow-up text-xs"></i><span class="font-bold text-lg" id="totalExpense">0</span>
+                    <div class="flex items-center justify-end gap-2 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20">
+                        <i class="fa-solid fa-arrow-up text-rose-400 text-xs"></i>
+                        <span class="font-bold text-rose-400 text-sm" id="totalExpense">0</span>
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/10 relative z-10 shadow-lg">
-                <div class="h-40 w-full flex justify-center items-center">
-                    <canvas id="expenseChart"></canvas>
-                </div>
+            
+            <div id="chartContainer" class="mt-4 h-0 overflow-hidden transition-all duration-300">
+                 <div class="h-40 flex justify-center"><canvas id="expenseChart"></canvas></div>
+            </div>
+            
+            <div class="absolute bottom-0 left-0 w-full flex justify-center translate-y-1/2">
+                <button onclick="toggleChart()" class="bg-slate-800 text-slate-400 w-8 h-8 rounded-full flex items-center justify-center shadow-lg border border-slate-700 text-xs">
+                    <i class="fa-solid fa-chevron-down transition-transform" id="chartIcon"></i>
+                </button>
             </div>
         </div>
 
-        <div class="max-w-xl mx-auto px-4">
+        <div id="scroll-content" class="hidden bg-slate-50 pt-8 px-4 pb-24">
             
-            <div id="formCard" class="bg-white p-5 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 mb-6 transition-all duration-300">
-                
-                <div class="flex justify-between items-center mb-4 hidden" id="editHeader">
-                    <span class="text-xs font-bold text-blue-600 uppercase">Modifică Tranzacție</span>
-                    <button onclick="cancelEdit()" class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg">Anulează</button>
+            <div id="formCard" class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-6 relative z-10">
+                <div id="editHeader" class="flex justify-between items-center mb-3 hidden bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <span class="text-xs font-bold text-blue-600 uppercase"><i class="fa-solid fa-pen mr-1"></i> Modifici o tranzacție</span>
+                    <button onclick="cancelEdit()" class="w-6 h-6 rounded-full bg-white text-slate-400 flex items-center justify-center shadow-sm"><i class="fa-solid fa-xmark text-xs"></i></button>
                 </div>
 
-                <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-4">
-                    <button id="btnExpense" onclick="setType('Expense')" class="touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuială</button>
-                    <button id="btnIncome" onclick="setType('Income')" class="touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all">Venit</button>
+                <div class="flex bg-slate-100 p-1 rounded-2xl mb-4">
+                    <button id="btnExpense" onclick="setType('Expense')" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuială</button>
+                    <button id="btnIncome" onclick="setType('Income')" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 transition-all">Venit</button>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="grid grid-cols-5 gap-3">
-                        <div class="col-span-2 relative">
-                             <input type="date" id="dateInput" class="w-full h-12 pl-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        </div>
-                        <div class="col-span-3">
-                            <input type="number" id="amount" placeholder="Sumă" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold text-slate-800 placeholder-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        </div>
+                <div class="space-y-3">
+                    <div class="grid grid-cols-5 gap-2">
+                        <input type="date" id="dateInput" class="col-span-2 h-12 pl-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:outline-blue-500">
+                        <input type="number" id="amount" placeholder="Sumă" class="col-span-3 h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold text-slate-800 placeholder-slate-300 focus:outline-blue-500">
                     </div>
                     
-                    <select id="category" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none">
+                    <select id="category" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-blue-500">
                         </select>
 
-                    <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-blue-500">
 
-                    <button id="saveBtn" class="touch-btn w-full bg-slate-800 text-white rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform mt-2 flex items-center justify-center gap-2">
-                        <span>Salvează</span>
+                    <button id="saveBtn" class="w-full bg-slate-900 text-white h-12 rounded-xl font-bold text-base shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2">
+                        Salvează
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-10 min-h-[200px]">
-                <div class="bg-slate-50/80 backdrop-blur p-4 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20">
-                    <h2 class="text-slate-700 font-bold text-sm">Istoric Tranzacții</h2>
-                    <div id="syncStatus" class="text-[10px] text-emerald-500 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 block"></span> Live</div>
-                </div>
-                <div id="transactionList" class="divide-y divide-slate-50">
-                    <div class="p-8 text-center text-slate-400 text-sm">Se încarcă datele...</div>
+            <div class="flex justify-between items-center px-2 mb-3">
+                <h2 class="text-slate-900 font-bold text-lg">Istoric</h2>
+                <div class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sync
                 </div>
             </div>
+
+            <div id="transactionList" class="space-y-3 pb-10">
+                <div class="p-10 text-center text-slate-400 text-sm">Se încarcă...</div>
+            </div>
         </div>
+
     </div>
 
-    <div id="settingsOverlay" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity" onclick="toggleSettings()"></div>
-    <div id="settingsPanel" class="fixed inset-x-0 bottom-0 bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col shadow-2xl">
+    <div id="settingsOverlay" class="absolute inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity" onclick="toggleSettings()"></div>
+    <div id="settingsPanel" class="absolute inset-x-0 bottom-0 bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 h-[80%] flex flex-col shadow-2xl">
+        <div class="w-full flex justify-center pt-4 pb-2" onclick="toggleSettings()"><div class="w-12 h-1.5 bg-slate-200 rounded-full"></div></div>
         
-        <div class="w-full flex justify-center pt-4 pb-2" onclick="toggleSettings()">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-6">
-            <div class="flex items-center gap-4 mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <img id="settingUserPhoto" src="" class="w-12 h-12 rounded-full bg-slate-200">
-                <div class="flex-1">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Cont</p>
-                    <p id="settingUserName" class="font-bold text-slate-800 truncate">User</p>
-                </div>
-                <button id="logoutBtn" class="text-rose-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-bold text-sm">Ieșire</button>
-            </div>
-
-            <h3 class="font-bold text-lg mb-4 text-slate-800">Categorii Personalizate</h3>
+        <div class="flex-1 overflow-y-auto p-6 pb-20">
+            <h3 class="font-bold text-lg mb-4 text-slate-800">Categorii</h3>
             
             <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
                 <button onclick="renderSettingsCats('Expense')" id="setTabExp" class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm">Cheltuieli</button>
@@ -150,26 +190,13 @@
 
             <div class="flex gap-2 mb-4">
                 <input type="text" id="newCatName" placeholder="Categorie nouă..." class="flex-1 h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
-                <button onclick="addNewCategory()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg active:bg-blue-700 transition">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
+                <button onclick="addNewCategory()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg active:bg-blue-700 transition"><i class="fa-solid fa-plus"></i></button>
             </div>
 
-            <div id="settingsCatList" class="space-y-2 pb-10">
-                </div>
+            <div id="settingsCatList" class="space-y-2"></div>
             
-            <div class="mt-8 mb-10">
-                 <p class="text-xs text-slate-400 uppercase font-bold mb-3">Zonă Periculoasă</p>
-                 <label class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 active:bg-slate-100 transition">
-                    <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-file-import"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-bold text-sm text-slate-700">Importă JSON Vechi</p>
-                        <p class="text-xs text-slate-400">Restaurează date pierdute</p>
-                    </div>
-                    <input type="file" class="hidden" onchange="importData(this)">
-                 </label>
+            <div class="mt-8">
+                 <button id="logoutBtn" class="w-full text-rose-500 bg-rose-50 py-3 rounded-xl font-bold text-sm">Ieșire din cont</button>
             </div>
         </div>
     </div>
@@ -180,8 +207,7 @@
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // --- CONFIG ---
-        
-        const firebaseConfig = {
+       const firebaseConfig = {
             apiKey: "AIzaSyBIVp3XbgLUgu2Q06RxCo8oM5j4YIz9V7k",
             authDomain: "budgettracker-75aa0.firebaseapp.com",
             projectId: "budgettracker-75aa0",
@@ -201,49 +227,47 @@
         let settingsTab = 'Expense';
         let chartInstance = null;
         let transactionsCache = [];
-        let editingId = null; // Pentru Edit Mode
+        let editingId = null;
+        let isChartOpen = false;
         
         let userConfig = {
-            expenseCats: ["Car Expenses", "House & Utilities", "Groceries", "Dining Out", "Nightlife", "Entertainment", "Savings"],
-            incomeCats: ["Salary", "Parents", "Friends", "Other"]
+            expenseCats: ["Mâncare", "Transport", "Casă", "Distracție", "Educație", "Economii"],
+            incomeCats: ["Salariu", "Părinți", "Freelance", "Altele"]
         };
 
         // --- AUTH ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('settingUserName').innerText = user.displayName;
-                document.getElementById('settingUserPhoto').src = user.photoURL || 'https://via.placeholder.com/50';
-                
+                document.getElementById('userName').innerText = user.displayName;
+                document.getElementById('userPhoto').src = user.photoURL;
                 document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('appScreen').classList.remove('hidden');
-                
+                document.getElementById('appHeader').classList.remove('hidden');
+                document.getElementById('scroll-content').classList.remove('hidden');
                 initAppData();
             } else {
                 currentUser = null;
                 document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('appScreen').classList.add('hidden');
+                document.getElementById('appHeader').classList.add('hidden');
+                document.getElementById('scroll-content').classList.add('hidden');
             }
         });
 
         document.getElementById('googleLoginBtn').addEventListener('click', () => signInWithPopup(auth, provider));
         document.getElementById('logoutBtn').addEventListener('click', () => { toggleSettings(); signOut(auth); });
 
-        // --- CORE LOGIC ---
+        // --- CORE ---
         function initAppData() {
             window.setType('Expense'); 
             document.getElementById('dateInput').valueAsDate = new Date();
 
-            // Sync Config
             const configRef = doc(db, "users", currentUser.uid, "settings", "config");
             onSnapshot(configRef, (snap) => {
                 if (snap.exists()) userConfig = snap.data();
                 else setDoc(configRef, userConfig);
-                window.setType(currentType); // Refresh dropdown
-                if(document.getElementById('settingsPanel').classList.contains('translate-y-0')) window.renderSettingsCats(settingsTab);
+                window.setType(currentType);
             });
 
-            // Sync Transacții
             const q = query(collection(db, "users", currentUser.uid, "transactions"), orderBy("date", "desc"));
             onSnapshot(q, (snapshot) => {
                 const txs = [];
@@ -253,7 +277,7 @@
             });
         }
 
-        // --- ADD / EDIT / DELETE ---
+        // --- ACTIONS ---
         document.getElementById('saveBtn').addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('amount').value);
             const dateVal = document.getElementById('dateInput').value;
@@ -263,50 +287,37 @@
             if(!amount) { alert("Introdu suma!"); return; }
 
             const btn = document.getElementById('saveBtn');
-            const originalText = btn.innerHTML;
             btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>"; 
             btn.disabled = true;
 
             try {
                 if(editingId) {
-                    // UPDATE existent
                     await updateDoc(doc(db, "users", currentUser.uid, "transactions", editingId), {
                         date: dateVal, amount: amount, category: cat, description: desc, type: currentType
                     });
-                    window.cancelEdit(); // Iesi din edit mode
+                    window.cancelEdit();
                 } else {
-                    // CREATE nou
                     await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
                         date: dateVal, amount: amount, category: cat, description: desc, type: currentType, createdAt: new Date()
                     });
-                    // Reset fields only on new add
                     document.getElementById('amount').value = '';
                     document.getElementById('description').value = '';
                 }
-            } catch (e) { alert("Eroare: " + e.message); }
+            } catch (e) { alert("Eroare"); }
             
-            btn.innerHTML = originalText; 
-            btn.disabled = false;
+            btn.innerHTML = "Salvează"; btn.disabled = false;
         });
 
-        // Functie pentru a porni editarea (Populeaza formularul)
         window.editTx = (id) => {
             const tx = transactionsCache.find(t => t.id === id);
             if(!tx) return;
-
             editingId = id;
-            
-            // Schimba UI in modul Edit
             document.getElementById('editHeader').classList.remove('hidden');
-            document.getElementById('saveBtn').innerHTML = "Actualizează Tranzacția";
-            document.getElementById('saveBtn').classList.remove('bg-slate-800');
-            document.getElementById('saveBtn').classList.add('bg-blue-600');
+            document.getElementById('saveBtn').innerText = "Actualizează";
+            document.getElementById('saveBtn').classList.replace('bg-slate-900', 'bg-blue-600');
+            document.getElementById('scroll-content').scrollTop = 0;
             
-            // Scroll sus la formular
-            document.getElementById('appScreen').scrollIntoView({ behavior: 'smooth' });
-
-            // Populeaza campurile
-            window.setType(tx.type); // Seteaza tabul corect
+            window.setType(tx.type);
             setTimeout(() => {
                 document.getElementById('dateInput').value = tx.date;
                 document.getElementById('amount').value = tx.amount;
@@ -318,16 +329,14 @@
         window.cancelEdit = () => {
             editingId = null;
             document.getElementById('editHeader').classList.add('hidden');
-            document.getElementById('saveBtn').innerHTML = "Salvează";
-            document.getElementById('saveBtn').classList.add('bg-slate-800');
-            document.getElementById('saveBtn').classList.remove('bg-blue-600');
+            document.getElementById('saveBtn').innerText = "Salvează";
+            document.getElementById('saveBtn').classList.replace('bg-blue-600', 'bg-slate-900');
             document.getElementById('amount').value = '';
             document.getElementById('description').value = '';
-            document.getElementById('dateInput').valueAsDate = new Date();
         }
 
         window.deleteTx = async (id) => {
-            if(confirm("Ștergi definitiv?")) {
+            if(confirm("Ștergi?")) {
                 if(editingId === id) window.cancelEdit();
                 await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
             }
@@ -352,29 +361,23 @@
                 const isInc = t.type === 'Income';
                 const dateDisp = new Date(t.date).toLocaleDateString('ro-RO', {day:'numeric', month:'short'});
                 
-                // Card Tranzactie optimizat pt Mobile
                 const div = document.createElement('div');
-                div.className = "p-4 flex justify-between items-center active:bg-slate-50 transition-colors";
+                div.className = "bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center";
                 div.innerHTML = `
-                    <div class="flex items-center gap-3.5 overflow-hidden">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-500 text-sm">
-                           <i class="fa-solid fa-receipt"></i>
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 flex-shrink-0 flex items-center justify-center text-slate-400">
+                           <i class="fa-solid ${isInc ? 'fa-wallet' : 'fa-receipt'}"></i>
                         </div>
                         <div class="min-w-0">
-                            <p class="font-bold text-slate-700 text-sm truncate pr-2">${t.description}</p>
+                            <p class="font-bold text-slate-800 text-sm truncate pr-2">${t.description}</p>
                             <p class="text-xs text-slate-400 font-medium">${dateDisp} • ${t.category}</p>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
-                        <p class="font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'} text-base">${isInc ? '+' : '-'}${t.amount}</p>
-                        
-                        <div class="flex gap-3 mt-0.5">
-                            <button onclick="editTx('${t.id}')" class="text-slate-300 hover:text-blue-500 p-1">
-                                <i class="fa-solid fa-pen text-xs"></i>
-                            </button>
-                            <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 p-1">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                        <p class="font-bold ${isInc ? 'text-emerald-500' : 'text-slate-800'} text-base">${isInc ? '+' : '-'}${t.amount}</p>
+                        <div class="flex gap-3">
+                            <button onclick="editTx('${t.id}')" class="text-slate-300 hover:text-blue-500"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500"><i class="fa-solid fa-trash text-xs"></i></button>
                         </div>
                     </div>
                 `;
@@ -396,26 +399,40 @@
                     labels: Object.keys(totals),
                     datasets: [{
                         data: Object.values(totals),
-                        backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#6366f1'],
+                        backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
                         borderWidth: 0,
-                        hoverOffset: 10
+                        hoverOffset: 4
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, cutout: '75%' }
             });
         }
 
-        // --- SETTINGS UI ---
+        // --- UTILS UI ---
+        window.toggleChart = () => {
+            const container = document.getElementById('chartContainer');
+            const icon = document.getElementById('chartIcon');
+            isChartOpen = !isChartOpen;
+            
+            if(isChartOpen) {
+                container.style.height = "160px";
+                icon.style.transform = "rotate(180deg)";
+            } else {
+                container.style.height = "0px";
+                icon.style.transform = "rotate(0deg)";
+            }
+        }
+
         window.toggleSettings = () => {
             const panel = document.getElementById('settingsPanel');
             const overlay = document.getElementById('settingsOverlay');
             if (panel.classList.contains('translate-y-full')) {
                 panel.classList.remove('translate-y-full'); panel.classList.add('translate-y-0');
-                overlay.classList.remove('hidden'); overlay.classList.remove('opacity-0');
+                overlay.classList.remove('hidden');
                 window.renderSettingsCats('Expense');
             } else {
                 panel.classList.add('translate-y-full'); panel.classList.remove('translate-y-0');
-                overlay.classList.add('hidden'); overlay.classList.add('opacity-0');
+                overlay.classList.add('hidden');
             }
         }
 
@@ -433,15 +450,14 @@
             });
 
             if(type === 'Expense') {
-                btnExp.className = "touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
-                btnInc.className = "touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all";
+                btnExp.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
+                btnInc.className = "flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 transition-all";
             } else {
-                btnExp.className = "touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all";
-                btnInc.className = "touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
+                btnExp.className = "flex-1 py-3 rounded-xl text-sm font-bold text-slate-400 transition-all";
+                btnInc.className = "flex-1 py-3 rounded-xl text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
             }
         }
         
-        // --- CATEGORY MANAGER ---
         window.renderSettingsCats = (tab) => {
             settingsTab = tab;
             const list = document.getElementById('settingsCatList');
@@ -458,12 +474,12 @@
 
             list.innerHTML = '';
             const cats = tab === 'Expense' ? userConfig.expenseCats : userConfig.incomeCats;
-            cats.forEach(c => {
+            if(cats) cats.forEach(c => {
                 const item = document.createElement('div');
                 item.className = "flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100";
                 item.innerHTML = `
                     <span class="font-bold text-sm text-slate-700">${c}</span>
-                    <button onclick="removeCat('${c}')" class="text-slate-300 hover:text-red-500 w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="removeCat('${c}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
                 `;
                 list.appendChild(item);
             });
@@ -483,24 +499,18 @@
         }
 
         window.removeCat = async (name) => {
-            if(!confirm("Ștergi categoria?")) return;
+            if(!confirm("Ștergi?")) return;
             const ref = doc(db, "users", currentUser.uid, "settings", "config");
             let list = settingsTab === 'Expense' ? [...userConfig.expenseCats] : [...userConfig.incomeCats];
             list = list.filter(c => c !== name);
             await updateDoc(ref, settingsTab === 'Expense' ? { expenseCats: list } : { incomeCats: list });
         }
-
-        window.importData = (i) => {
-            const f = i.files[0]; if(!f) return;
-            const r = new FileReader();
-            r.onload = async(e) => {
-                const d = JSON.parse(e.target.result);
-                if(confirm(`Import ${d.length} iteme?`)) {
-                    for(const t of d) await addDoc(collection(db,"users",currentUser.uid,"transactions"),{...t, createdAt:new Date()});
-                    alert("Import complet!"); toggleSettings();
-                }
-            };
-            r.readAsText(f);
+        
+        // Export
+        window.exportData = () => {
+             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactionsCache));
+             const node = document.createElement('a'); node.href = dataStr;
+             node.download = "backup.json"; node.click();
         }
     </script>
 </body>

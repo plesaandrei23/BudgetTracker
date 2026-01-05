@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Student Budget Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .hidden { display: none !important; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .active-type { background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transform: scale(1.02); }
+        .tab-btn { transition: all 0.2s; }
+    </style>
+</head>
+<body class="pb-20 text-slate-800">
+
+    <div class="bg-slate-900 text-white p-6 rounded-b-[2rem] shadow-xl mb-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+
+        <div class="flex justify-between items-center mb-6 relative z-10">
+            <h1 class="text-xl font-bold tracking-tight"><i class="fa-solid fa-chart-pie mr-2 text-blue-400"></i>Budget Pro</h1>
+            <div class="space-x-1">
+                <button onclick="exportData()" class="bg-white/10 p-2 rounded-lg hover:bg-white/20 backdrop-blur-sm transition"><i class="fa-solid fa-download"></i></button>
+                <label class="bg-white/10 p-2 rounded-lg hover:bg-white/20 backdrop-blur-sm transition cursor-pointer inline-block">
+                    <i class="fa-solid fa-upload"></i>
+                    <input type="file" id="fileInput" class="hidden" onchange="importData(this)">
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-end mb-6 relative z-10">
+            <div>
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Rămas (Balance)</p>
+                <p class="text-3xl font-bold tracking-tight" id="balance">0 Lei</p>
+            </div>
+            <div class="text-right space-y-1">
+                <div class="flex items-center justify-end gap-2 text-emerald-400">
+                    <i class="fa-solid fa-arrow-down text-xs"></i>
+                    <span class="font-bold" id="totalIncome">0</span>
+                </div>
+                <div class="flex items-center justify-end gap-2 text-rose-400">
+                    <i class="fa-solid fa-arrow-up text-xs"></i>
+                    <span class="font-bold" id="totalExpense">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10 relative z-10">
+            <h3 class="text-xs text-center text-slate-400 mb-2 uppercase tracking-widest">Cheltuieli per Categorie</h3>
+            <div class="h-48 w-full flex justify-center items-center">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-xl mx-auto px-4">
+        
+        <div id="formContainer" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-slate-700 font-bold text-sm uppercase tracking-wide" id="formTitle">Adaugă Tranzacție</h2>
+                <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden text-xs text-rose-500 font-bold bg-rose-50 px-2 py-1 rounded">Anulează Editarea</button>
+            </div>
+            
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
+                <button id="btnExpense" onclick="setType('Expense')" class="tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-rose-600 active-type">Cheltuială</button>
+                <button id="btnIncome" onclick="setType('Income')" class="tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400">Venit</button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dată</label>
+                        <input type="date" id="dateInput" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sumă (RON)</label>
+                        <input type="number" id="amount" placeholder="0.00" step="0.01" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Categorie</label>
+                    <select id="category" onchange="checkCategory()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </select>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">Metodă Plată</label>
+                    <div class="flex gap-4 mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+                            <input type="radio" name="payMethod" value="Cash" checked onclick="toggleBank(false)" class="accent-blue-600"> 
+                            <i class="fa-solid fa-money-bill text-green-600"></i> Cash
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-600">
+                            <input type="radio" name="payMethod" value="Card" onclick="toggleBank(true)" class="accent-blue-600"> 
+                            <i class="fa-solid fa-credit-card text-blue-600"></i> Card
+                        </label>
+                    </div>
+
+                    <div id="bankSelector" class="hidden mt-2 pt-2 border-t border-slate-200">
+                        <select id="bankName" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-sm">
+                            <option value="Revolut">Revolut</option>
+                            <option value="BT">Banca Transilvania (BT)</option>
+                            <option value="Salt Bank">Salt Bank</option>
+                            <option value="Altele">Altă Bancă</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="dynamicInput" class="hidden">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1" id="dynamicLabel">Detalii</label>
+                    <input type="text" id="dynamicText" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <div id="stdDesc">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Descriere</label>
+                    <input type="text" id="description" placeholder="ex. Pizza, Chirie..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <button id="saveBtn" onclick="handleFormSubmit()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-slate-700 active:scale-95 transition-transform mt-2">
+                    <i class="fa-solid fa-plus mr-2"></i> Salvează Tranzacția
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-4">
+            <div class="flex justify-between items-center cursor-pointer" onclick="document.getElementById('filterPanel').classList.toggle('hidden')">
+                <h3 class="text-xs font-bold uppercase text-slate-500"><i class="fa-solid fa-filter mr-1"></i> Filtrează Lista</h3>
+                <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+            </div>
+            
+            <div id="filterPanel" class="hidden mt-3 grid grid-cols-2 gap-2">
+                <select id="filterType" onchange="renderList()" class="p-2 text-xs bg-slate-50 border rounded-lg">
+                    <option value="All">Toate Tipurile</option>
+                    <option value="Expense">Doar Cheltuieli</option>
+                    <option value="Income">Doar Venituri</option>
+                </select>
+                <select id="filterMethod" onchange="renderList()" class="p-2 text-xs bg-slate-50 border rounded-lg">
+                    <option value="All">Toate Metodele</option>
+                    <option value="Cash">Doar Cash</option>
+                    <option value="Card">Doar Card</option>
+                </select>
+                <select id="filterCategory" onchange="renderList()" class="col-span-2 p-2 text-xs bg-slate-50 border rounded-lg">
+                    <option value="All">Toate Categoriile</option>
+                    </select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 p-3 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-slate-700 font-bold text-sm">Istoric Tranzacții</h2>
+                <button onclick="clearAll()" class="text-[10px] text-rose-500 font-bold hover:underline">Șterge Tot</button>
+            </div>
+            <div id="transactionList" class="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- STATE ---
+        let transactions = JSON.parse(localStorage.getItem('budgetData')) || [];
+        let currentType = 'Expense';
+        let editingId = null; // null = adaugare noua, ID = editare
+        let chartInstance = null;
+
+        const expenseCats = ["Car Expenses", "House & Utilities", "Groceries", "Dining Out", "Nightlife & Drinking", "Entertainment", "Academic Supplies", "Personal Care", "Savings", "Extras"];
+        const incomeCats = ["Parents", "Friends", "Ridesharing", "Salary", "Other"];
+
+        // --- INIT ---
+        window.onload = () => {
+            setType('Expense');
+            document.getElementById('dateInput').valueAsDate = new Date();
+            updateFilterCategories();
+            saveAndRender();
+        };
+
+        // --- UI TOGGLES ---
+        function setType(type) {
+            currentType = type;
+            const btnExp = document.getElementById('btnExpense');
+            const btnInc = document.getElementById('btnIncome');
+            
+            if(type === 'Expense') {
+                btnExp.className = "tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-rose-600 bg-white shadow-sm";
+                btnInc.className = "tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:bg-slate-50";
+            } else {
+                btnExp.className = "tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 hover:bg-slate-50";
+                btnInc.className = "tab-btn flex-1 py-2 rounded-lg text-sm font-bold text-emerald-600 bg-white shadow-sm";
+            }
+
+            // Populate Dropdown
+            const select = document.getElementById('category');
+            select.innerHTML = '';
+            const list = type === 'Expense' ? expenseCats : incomeCats;
+            list.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+            checkCategory();
+        }
+
+        function toggleBank(show) {
+            const bankSel = document.getElementById('bankSelector');
+            if(show) bankSel.classList.remove('hidden');
+            else bankSel.classList.add('hidden');
+        }
+
+        function checkCategory() {
+            const cat = document.getElementById('category').value;
+            const dynInput = document.getElementById('dynamicInput');
+            const dynLabel = document.getElementById('dynamicLabel');
+            const dynText = document.getElementById('dynamicText');
+            const stdDesc = document.getElementById('stdDesc');
+
+            dynInput.classList.add('hidden');
+            stdDesc.classList.remove('hidden');
+
+            if(currentType === 'Income') {
+                if(cat === 'Friends') {
+                    dynInput.classList.remove('hidden');
+                    stdDesc.classList.add('hidden');
+                    dynLabel.innerText = "Nume Prieten";
+                    dynText.placeholder = "Numele...";
+                } else if (cat === 'Other') {
+                    dynInput.classList.remove('hidden');
+                    stdDesc.classList.add('hidden');
+                    dynLabel.innerText = "Sursă Venit";
+                    dynText.placeholder = "Sursa...";
+                }
+            }
+        }
+
+        // --- CRUD OPERATIONS ---
+
+        function handleFormSubmit() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const dateVal = document.getElementById('dateInput').value;
+            const cat = document.getElementById('category').value;
+            const desc = document.getElementById('description').value;
+            const dynVal = document.getElementById('dynamicText').value;
+            
+            // Payment Data
+            const payMethodRadio = document.querySelector('input[name="payMethod"]:checked');
+            const payMethod = payMethodRadio ? payMethodRadio.value : 'Cash';
+            let bankName = null;
+            if(payMethod === 'Card') {
+                bankName = document.getElementById('bankName').value;
+            }
+
+            if(!amount || isNaN(amount)) { alert("Introdu o sumă validă!"); return; }
+            if(!dateVal) { alert("Alege o dată!"); return; }
+
+            // Construct Description
+            let finalDesc = desc;
+            if(currentType === 'Income') {
+                if(cat === 'Friends') finalDesc = "De la: " + dynVal;
+                else if(cat === 'Other') finalDesc = "Sursă: " + dynVal;
+                else if(cat === 'Parents') finalDesc = finalDesc || "Alocație";
+            } else {
+                finalDesc = finalDesc || cat;
+            }
+
+            if(editingId) {
+                // UPDATE EXISTING
+                const index = transactions.findIndex(t => t.id === editingId);
+                if(index !== -1) {
+                    transactions[index] = {
+                        ...transactions[index], // keep ID
+                        date: dateVal,
+                        type: currentType,
+                        category: cat,
+                        description: finalDesc,
+                        amount: amount,
+                        method: payMethod,
+                        bank: bankName
+                    };
+                }
+                cancelEdit(); // Reset form mode
+            } else {
+                // CREATE NEW
+                const transaction = {
+                    id: Date.now(),
+                    date: dateVal,
+                    type: currentType,
+                    category: cat,
+                    description: finalDesc,
+                    amount: amount,
+                    method: payMethod,
+                    bank: bankName
+                };
+                transactions.push(transaction);
+            }
+
+            saveAndRender();
+            resetForm();
+        }
+
+        function editTransaction(id) {
+            const t = transactions.find(x => x.id === id);
+            if(!t) return;
+
+            editingId = id; // Set global edit ID
+
+            // UI Changes
+            document.getElementById('formTitle').innerText = "Modifică Tranzacție";
+            document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i> Actualizează';
+            document.getElementById('saveBtn').className = "w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 mt-2";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            // Populate Fields
+            setType(t.type);
+            document.getElementById('dateInput').value = t.date;
+            document.getElementById('amount').value = t.amount;
+            
+            // Wait for dropdown to populate then select
+            setTimeout(() => {
+                document.getElementById('category').value = t.category;
+                checkCategory();
+                
+                // Handle Dynamic Fields Reverse
+                if(t.type === 'Income' && (t.category === 'Friends' || t.category === 'Other')) {
+                    const parts = t.description.split(': ');
+                    if(parts.length > 1) document.getElementById('dynamicText').value = parts[1];
+                } else {
+                    document.getElementById('description').value = t.description;
+                }
+            }, 50);
+
+            // Populate Payment
+            if(t.method === 'Card') {
+                document.querySelector('input[name="payMethod"][value="Card"]').checked = true;
+                toggleBank(true);
+                if(t.bank) document.getElementById('bankName').value = t.bank;
+            } else {
+                document.querySelector('input[name="payMethod"][value="Cash"]').checked = true;
+                toggleBank(false);
+            }
+
+            // Scroll to top
+            document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            document.getElementById('formTitle').innerText = "Adaugă Tranzacție";
+            document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-plus mr-2"></i> Salvează Tranzacția';
+            document.getElementById('saveBtn').className = "w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-slate-700 mt-2";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            resetForm();
+        }
+
+        function deleteTransaction(id) {
+            if(confirm('Ștergi definitiv?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                if(editingId === id) cancelEdit();
+                saveAndRender();
+            }
+        }
+
+        function clearAll() {
+            if(confirm('ATENȚIE: Ștergi tot istoricul?')) {
+                transactions = [];
+                cancelEdit();
+                saveAndRender();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('dynamicText').value = '';
+            // Reset date to today
+            document.getElementById('dateInput').valueAsDate = new Date();
+        }
+
+        // --- RENDER & LOGIC ---
+
+        function saveAndRender() {
+            localStorage.setItem('budgetData', JSON.stringify(transactions));
+            
+            // Recalc Totals
+            let inc = 0, exp = 0;
+            transactions.forEach(t => {
+                if(t.type === 'Income') inc += t.amount;
+                else exp += t.amount;
+            });
+            document.getElementById('totalIncome').innerText = "+" + inc.toFixed(0);
+            document.getElementById('totalExpense').innerText = "-" + exp.toFixed(0);
+            document.getElementById('balance').innerText = (inc - exp).toFixed(2) + " Lei";
+
+            updateChart();
+            renderList();
+        }
+
+        function updateFilterCategories() {
+            const filterCat = document.getElementById('filterCategory');
+            // Keep "All"
+            filterCat.innerHTML = '<option value="All">Toate Categoriile</option>';
+            
+            // Combine all unique cats
+            const allCats = [...new Set([...expenseCats, ...incomeCats])].sort();
+            allCats.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c;
+                opt.innerText = c;
+                filterCat.appendChild(opt);
+            });
+        }
+
+        function renderList() {
+            const list = document.getElementById('transactionList');
+            const fType = document.getElementById('filterType').value;
+            const fMethod = document.getElementById('filterMethod').value;
+            const fCat = document.getElementById('filterCategory').value;
+
+            // Sort & Filter
+            let filtered = transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if(fType !== 'All') filtered = filtered.filter(t => t.type === fType);
+            if(fMethod !== 'All') filtered = filtered.filter(t => (t.method || 'Cash') === fMethod);
+            if(fCat !== 'All') filtered = filtered.filter(t => t.category === fCat);
+
+            list.innerHTML = '';
+            if(filtered.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-slate-400 text-sm"><i class="fa-solid fa-wind text-2xl mb-2 block"></i>Nimic găsit.</div>';
+                return;
+            }
+
+            filtered.forEach(t => {
+                const isInc = t.type === 'Income';
+                const colorClass = isInc ? 'text-emerald-600' : 'text-rose-600';
+                const sign = isInc ? '+' : '-';
+                const dateDisp = new Date(t.date).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' });
+                
+                // Bank Icon logic
+                let methodIcon = '<i class="fa-solid fa-money-bill text-green-600 ml-1" title="Cash"></i>';
+                if(t.method === 'Card') {
+                    let bankClass = "text-blue-600";
+                    let bankNameShort = "Card";
+                    if(t.bank === 'Revolut') { bankClass="text-pink-500"; bankNameShort="Rev"; }
+                    else if(t.bank === 'BT') { bankClass="text-yellow-600"; bankNameShort="BT"; }
+                    else if(t.bank === 'Salt Bank') { bankClass="text-indigo-500"; bankNameShort="Salt"; }
+                    
+                    methodIcon = `<span class="text-[10px] font-bold ${bankClass} border border-current px-1 rounded ml-1">${bankNameShort}</span>`;
+                }
+
+                const item = document.createElement('div');
+                item.className = "p-4 hover:bg-slate-50 transition flex justify-between items-center group";
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-500 text-lg">
+                            <i class="${getIcon(t.category)}"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <p class="font-bold text-slate-700 text-sm">${t.description}</p>
+                                ${methodIcon}
+                            </div>
+                            <p class="text-xs text-slate-400">${dateDisp} • ${t.category}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold ${colorClass}">${sign}${t.amount}</p>
+                        <div class="flex gap-3 justify-end mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editTransaction(${t.id})" class="text-xs text-blue-400 hover:text-blue-600"><i class="fa-solid fa-pencil"></i></button>
+                            <button onclick="deleteTransaction(${t.id})" class="text-xs text-slate-300 hover:text-rose-500"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            // Filter only expenses
+            const expenses = transactions.filter(t => t.type === 'Expense');
+            
+            // Group by category
+            const totals = {};
+            expenses.forEach(t => {
+                if(!totals[t.category]) totals[t.category] = 0;
+                totals[t.category] += t.amount;
+            });
+
+            const labels = Object.keys(totals);
+            const data = Object.values(totals);
+
+            // Destroy old chart if exists
+            if(chartInstance) chartInstance.destroy();
+
+            // Colors
+            const colors = [
+                '#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', 
+                '#ec4899', '#6366f1', '#14b8a6', '#f97316', '#64748b'
+            ];
+
+            if(data.length === 0) {
+                // Empty state for chart
+                return; 
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Hide legend to save space
+                        tooltip: { 
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${ctx.raw} RON`
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // --- UTILS ---
+        function getIcon(cat) {
+            const map = {
+                'Car Expenses': 'fa-solid fa-car',
+                'Groceries': 'fa-solid fa-basket-shopping',
+                'Dining Out': 'fa-solid fa-utensils',
+                'Nightlife & Drinking': 'fa-solid fa-martini-glass-citrus',
+                'House & Utilities': 'fa-solid fa-house-chimney',
+                'Entertainment': 'fa-solid fa-ticket',
+                'Academic Supplies': 'fa-solid fa-graduation-cap',
+                'Personal Care': 'fa-solid fa-pump-soap',
+                'Savings': 'fa-solid fa-piggy-bank',
+                'Extras': 'fa-solid fa-gamepad',
+                'Salary': 'fa-solid fa-briefcase',
+                'Parents': 'fa-solid fa-user-group',
+                'Friends': 'fa-solid fa-hand-holding-dollar',
+                'Ridesharing': 'fa-solid fa-taxi',
+                'Other': 'fa-solid fa-circle-question'
+            };
+            return map[cat] || 'fa-solid fa-receipt';
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions));
+            const node = document.createElement('a');
+            node.href = dataStr;
+            node.download = `budget_backup_${new Date().toISOString().slice(0,10)}.json`;
+            node.click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(Array.isArray(data)) {
+                        transactions = data;
+                        saveAndRender();
+                        alert("Backup restaurat cu succes!");
+                    }
+                } catch(err) { alert("Fișier corupt."); }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

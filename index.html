@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,14 +17,9 @@
     
     <style>
         * { -webkit-tap-highlight-color: transparent; }
-        body { 
-            background-color: #f8fafc; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; padding: 0;
-            overscroll-behavior-y: none;
-        }
+        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; overscroll-behavior-y: none; }
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
@@ -37,7 +31,7 @@
             <i class="fa-solid fa-wallet text-5xl"></i>
         </div>
         <h1 class="text-4xl font-bold mb-3 tracking-tight">Budget Pro</h1>
-        <p class="text-slate-400 mb-12 text-center">Platforma ta financiară inteligentă.</p>
+        <p class="text-slate-400 mb-12 text-center">Gestionează-ți banii inteligent.</p>
         <button id="googleLoginBtn" class="bg-white text-slate-900 px-8 py-4 rounded-xl font-bold flex items-center gap-3 hover:bg-slate-100 active:scale-95 transition shadow-xl w-full max-w-sm justify-center">
             <i class="fa-brands fa-google text-red-500 text-xl"></i> Autentificare Google
         </button>
@@ -49,7 +43,7 @@
                 <div class="flex items-center gap-3">
                     <img id="userPhoto" src="" class="w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800">
                     <div>
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Bun venit,</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Salut,</p>
                         <p id="userName" class="text-sm font-bold leading-none">User</p>
                     </div>
                 </div>
@@ -64,13 +58,13 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                <div class="col-span-2 md:col-span-2">
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Balanță Totală</p>
+                <div class="col-span-2">
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Balanță</p>
                     <p class="text-4xl font-extrabold tracking-tight" id="balance">0.00 Lei</p>
                 </div>
                 <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-center justify-between">
                     <div>
-                        <p class="text-[10px] text-emerald-400 font-bold uppercase">Venituri</p>
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase">Venit</p>
                         <p class="font-bold text-emerald-400 text-lg" id="totalIncome">0</p>
                     </div>
                     <i class="fa-solid fa-arrow-down text-emerald-500/50 text-xl"></i>
@@ -90,8 +84,18 @@
         <div class="max-w-5xl mx-auto w-full p-4 md:p-8 md:grid md:grid-cols-12 md:gap-8">
             
             <div class="md:col-span-5 space-y-6">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="h-40 w-full flex justify-center"><canvas id="expenseChart"></canvas></div>
+                
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 relative">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4">Analiză Cheltuieli</h3>
+                    
+                    <div class="relative h-48 w-full flex justify-center items-center">
+                        <canvas id="expenseChart" class="z-10 relative"></canvas>
+                        
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                            <p class="text-xs text-slate-400 font-bold uppercase">Total</p>
+                            <p class="text-xl font-bold text-slate-800" id="chartTotal">0</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="formCard" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 sticky top-4">
@@ -109,30 +113,21 @@
 
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="date" id="dateInput" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <input type="number" id="amount" placeholder="Sumă" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="date" id="dateInput" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="number" id="amount" placeholder="Sumă" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        
-                        <select id="category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none appearance-none">
-                            </select>
-
-                        <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-
-                        <button id="saveBtn" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2">
-                            Salvează
-                        </button>
+                        <select id="category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500"></select>
+                        <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="saveBtn" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2">Salvează</button>
                     </div>
                 </div>
             </div>
 
             <div class="md:col-span-7 mt-6 md:mt-0">
                 <div class="flex justify-between items-center mb-4 px-1">
-                    <h2 class="text-slate-800 font-bold text-lg">Tranzacții Recente</h2>
-                    <div class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sync
-                    </div>
+                    <h2 class="text-slate-800 font-bold text-lg">Tranzacții</h2>
+                    <div class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-full flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sync</div>
                 </div>
-
                 <div id="transactionList" class="space-y-3 pb-24 md:pb-0">
                     <div class="p-10 text-center text-slate-400 text-sm">Se încarcă...</div>
                 </div>
@@ -141,31 +136,23 @@
     </main>
 
     <div id="settingsOverlay" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm hidden flex items-end md:items-center justify-center" onclick="toggleSettings()">
-        
-        <div id="settingsPanel" class="w-full h-[85vh] md:h-auto md:max-w-md bg-white rounded-t-[2rem] md:rounded-2xl shadow-2xl flex flex-col transform transition-all duration-300 translate-y-full opacity-0 hidden" onclick="event.stopPropagation()">
-            
+        <div id="settingsPanel" class="w-full h-[85vh] md:h-auto md:max-w-md bg-white rounded-t-[2rem] md:rounded-2xl shadow-2xl flex flex-col hidden" onclick="event.stopPropagation()">
             <div class="w-full flex justify-center pt-4 pb-2 md:hidden" onclick="toggleSettings()"><div class="w-12 h-1.5 bg-slate-200 rounded-full"></div></div>
-            
             <div class="hidden md:flex justify-between items-center p-6 pb-0">
                 <h3 class="font-bold text-xl text-slate-800">Setări</h3>
                 <button onclick="toggleSettings()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
             <div class="flex-1 overflow-y-auto p-6">
                 <h3 class="font-bold text-lg mb-4 text-slate-800 md:hidden">Setări Categorii</h3>
-                
                 <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
                     <button onclick="renderSettingsCats('Expense')" id="setTabExp" class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuieli</button>
                     <button onclick="renderSettingsCats('Income')" id="setTabInc" class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all">Venituri</button>
                 </div>
-
                 <div class="flex gap-2 mb-4">
                     <input type="text" id="newCatName" placeholder="Nume categorie..." class="flex-1 h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
                     <button onclick="addNewCategory()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg hover:bg-blue-700 transition"><i class="fa-solid fa-plus"></i></button>
                 </div>
-
                 <div id="settingsCatList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
-                
                 <div class="mt-8 pt-4 border-t border-slate-100">
                      <button id="logoutBtn" class="w-full text-rose-500 bg-rose-50 hover:bg-rose-100 py-3.5 rounded-xl font-bold text-sm border border-rose-100 transition">Ieșire din cont</button>
                 </div>
@@ -178,7 +165,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
+       const firebaseConfig = {
             apiKey: "AIzaSyBIVp3XbgLUgu2Q06RxCo8oM5j4YIz9V7k",
             authDomain: "budgettracker-75aa0.firebaseapp.com",
             projectId: "budgettracker-75aa0",
@@ -200,12 +187,14 @@
         let transactionsCache = [];
         let editingId = null;
         
-        let userConfig = {
-            expenseCats: ["Mâncare", "Transport", "Casă", "Distracție", "Educație", "Economii"],
-            incomeCats: ["Salariu", "Părinți", "Freelance", "Altele"]
-        };
+        // Paleta de culori extinsa (12 culori)
+        const chartColors = [
+            '#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', 
+            '#06b6d4', '#84cc16', '#e11d48', '#6366f1', '#14b8a6', '#d946ef'
+        ];
+        
+        let userConfig = { expenseCats: ["Mâncare", "Transport", "Casă", "Distracție", "Educație"], incomeCats: ["Salariu", "Părinți", "Freelance"] };
 
-        // --- AUTH ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -226,18 +215,15 @@
         document.getElementById('googleLoginBtn').addEventListener('click', () => signInWithPopup(auth, provider));
         document.getElementById('logoutBtn').addEventListener('click', () => { toggleSettings(); signOut(auth); });
 
-        // --- APP LOGIC ---
         function initAppData() {
             window.setType('Expense'); 
             document.getElementById('dateInput').valueAsDate = new Date();
-
             const configRef = doc(db, "users", currentUser.uid, "settings", "config");
             onSnapshot(configRef, (snap) => {
                 if (snap.exists()) userConfig = snap.data();
                 else setDoc(configRef, userConfig);
                 window.setType(currentType);
             });
-
             const q = query(collection(db, "users", currentUser.uid, "transactions"), orderBy("date", "desc"));
             onSnapshot(q, (snapshot) => {
                 const txs = [];
@@ -252,28 +238,18 @@
             const dateVal = document.getElementById('dateInput').value;
             const cat = document.getElementById('category').value;
             const desc = document.getElementById('description').value || cat;
-
             if(!amount) { alert("Introdu suma!"); return; }
-
             const btn = document.getElementById('saveBtn');
-            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>"; 
-            btn.disabled = true;
-
+            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>"; btn.disabled = true;
             try {
                 if(editingId) {
-                    await updateDoc(doc(db, "users", currentUser.uid, "transactions", editingId), {
-                        date: dateVal, amount: amount, category: cat, description: desc, type: currentType
-                    });
+                    await updateDoc(doc(db, "users", currentUser.uid, "transactions", editingId), { date: dateVal, amount, category: cat, description: desc, type: currentType });
                     window.cancelEdit();
                 } else {
-                    await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                        date: dateVal, amount: amount, category: cat, description: desc, type: currentType, createdAt: new Date()
-                    });
-                    document.getElementById('amount').value = '';
-                    document.getElementById('description').value = '';
+                    await addDoc(collection(db, "users", currentUser.uid, "transactions"), { date: dateVal, amount, category: cat, description: desc, type: currentType, createdAt: new Date() });
+                    document.getElementById('amount').value = ''; document.getElementById('description').value = '';
                 }
             } catch (e) { alert("Eroare"); }
-            
             btn.innerHTML = "Salvează"; btn.disabled = false;
         });
 
@@ -284,8 +260,7 @@
             document.getElementById('editHeader').classList.remove('hidden');
             document.getElementById('saveBtn').innerText = "Actualizează";
             document.getElementById('saveBtn').classList.replace('bg-slate-900', 'bg-blue-600');
-            document.querySelector('main').scrollTop = 0;
-            
+            if(window.innerWidth < 768) document.querySelector('main').scrollTop = 0;
             window.setType(tx.type);
             setTimeout(() => {
                 document.getElementById('dateInput').value = tx.date;
@@ -300,16 +275,10 @@
             document.getElementById('editHeader').classList.add('hidden');
             document.getElementById('saveBtn').innerText = "Salvează";
             document.getElementById('saveBtn').classList.replace('bg-blue-600', 'bg-slate-900');
-            document.getElementById('amount').value = '';
-            document.getElementById('description').value = '';
+            document.getElementById('amount').value = ''; document.getElementById('description').value = '';
         }
 
-        window.deleteTx = async (id) => {
-            if(confirm("Ștergi?")) {
-                if(editingId === id) window.cancelEdit();
-                await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
-            }
-        }
+        window.deleteTx = async (id) => { if(confirm("Ștergi?")) { if(editingId === id) window.cancelEdit(); await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id)); }}
 
         function renderApp(transactions) {
             const list = document.getElementById('transactionList');
@@ -325,10 +294,8 @@
                     exp += t.amount;
                     catTotals[t.category] = (catTotals[t.category] || 0) + t.amount;
                 }
-
                 const isInc = t.type === 'Income';
                 const dateDisp = new Date(t.date).toLocaleDateString('ro-RO', {day:'numeric', month:'short'});
-                
                 const div = document.createElement('div');
                 div.className = "bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-center hover:bg-slate-50 transition group";
                 div.innerHTML = `
@@ -354,6 +321,7 @@
 
             document.getElementById('totalIncome').innerText = inc;
             document.getElementById('totalExpense').innerText = exp;
+            document.getElementById('chartTotal').innerText = exp + " Lei"; // Totalul in mijlocul graficului
             document.getElementById('balance').innerText = (inc - exp).toFixed(2) + " Lei";
             updateChart(catTotals);
         }
@@ -361,49 +329,46 @@
         function updateChart(totals) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
+            
+            // Daca nu sunt cheltuieli, afisam un cerc gri gol
+            const dataValues = Object.values(totals);
+            const isEmpty = dataValues.length === 0;
+
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(totals),
+                    labels: isEmpty ? ['Fără date'] : Object.keys(totals),
                     datasets: [{
-                        data: Object.values(totals),
-                        backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+                        data: isEmpty ? [1] : dataValues,
+                        backgroundColor: isEmpty ? ['#e2e8f0'] : chartColors,
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, cutout: '75%' }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { 
+                            display: !isEmpty, // Afisam legenda doar daca avem date
+                            position: 'bottom',
+                            labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } }
+                        },
+                        tooltip: { enabled: !isEmpty }
+                    }, 
+                    cutout: '75%' 
+                }
             });
         }
 
-        // --- FIXED SETTINGS TOGGLE LOGIC ---
         window.toggleSettings = () => {
             const panel = document.getElementById('settingsPanel');
             const overlay = document.getElementById('settingsOverlay');
-            
-            // Verificam daca e inchis (bazat pe clasa hidden)
-            const isClosed = panel.classList.contains('hidden');
-
-            if (isClosed) {
-                // OPEN
-                panel.classList.remove('hidden');
-                overlay.classList.remove('hidden');
-                
-                // Mic delay pentru a permite tranzitia CSS (Fade In / Slide Up)
-                setTimeout(() => {
-                    panel.classList.remove('translate-y-full', 'opacity-0');
-                }, 10);
-                
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden'); overlay.classList.remove('hidden');
                 window.renderSettingsCats('Expense');
             } else {
-                // CLOSE
-                panel.classList.add('translate-y-full', 'opacity-0');
-                
-                // Asteptam terminarea animatiei (300ms) inainte sa punem hidden
-                setTimeout(() => {
-                    panel.classList.add('hidden');
-                    overlay.classList.add('hidden');
-                }, 300);
+                panel.classList.add('hidden'); overlay.classList.add('hidden');
             }
         }
 
@@ -418,7 +383,6 @@
                 const opt = document.createElement('option');
                 opt.value = c; opt.innerText = c; catSelect.appendChild(opt);
             });
-
             if(type === 'Expense') {
                 btnExp.className = "flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
                 btnInc.className = "flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all";

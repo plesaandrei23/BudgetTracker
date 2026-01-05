@@ -2,63 +2,75 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Budget Pro Custom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Budget Pro Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* Fundal extins pentru a acoperi tot ecranul pe mobil */
+        html { background-color: #0f172a; height: 100%; }
+        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; height: 100%; }
+        
         .hidden { display: none !important; }
-        .modal-enter { animation: slideIn 0.3s ease-out forwards; }
-        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* Butoane tactile mai mari pentru mobil */
+        .touch-btn { min-height: 44px; }
+        
+        /* Animatii */
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
-<body class="pb-20 text-slate-800">
+<body class="pb-24 text-slate-800">
 
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center text-white p-6 hidden">
         <i class="fa-solid fa-cloud text-6xl text-blue-500 mb-6"></i>
-        <h1 class="text-3xl font-bold mb-2">Budget Cloud</h1>
-        <p class="text-slate-400 mb-8 text-center">Sincronizare & Categorii Custom</p>
-        <button id="googleLoginBtn" class="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold flex items-center gap-3 hover:bg-slate-100 transition">
-            <i class="fa-brands fa-google text-red-500"></i> Autentificare cu Google
+        <h1 class="text-3xl font-bold mb-2">Budget Pro</h1>
+        <p class="text-slate-400 mb-8 text-center">Login pentru sincronizare</p>
+        <button id="googleLoginBtn" class="bg-white text-slate-900 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 active:scale-95 transition w-full justify-center max-w-xs">
+            <i class="fa-brands fa-google text-red-500 text-xl"></i> Continuă cu Google
         </button>
     </div>
 
     <div id="appScreen" class="hidden">
         
-        <div class="bg-slate-900 text-white p-6 rounded-b-[2rem] shadow-xl mb-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+        <div class="bg-slate-900 text-white pt-[max(20px,env(safe-area-inset-top))] pb-8 px-6 rounded-b-[2.5rem] shadow-xl mb-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full mix-blend-overlay filter blur-[60px] opacity-20 pointer-events-none"></div>
             
-            <div class="flex justify-between items-center mb-6 relative z-10">
-                <h1 class="text-xl font-bold">Budget Pro</h1>
+            <div class="flex justify-between items-center mb-6 mt-2 relative z-10">
+                <h1 class="text-xl font-bold tracking-tight">Budget Pro</h1>
                 
                 <div class="flex gap-3">
-                    <button onclick="exportData()" class="bg-white/10 w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Backup">
-                        <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
+                    <button onclick="exportData()" class="bg-white/10 w-10 h-10 rounded-xl active:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Backup">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
                     </button>
-                    <button onclick="toggleSettings()" class="bg-white/10 w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Setări">
-                        <i class="fa-solid fa-gear text-xs"></i>
+                    <button onclick="toggleSettings()" class="bg-white/10 w-10 h-10 rounded-xl active:bg-white/20 flex items-center justify-center backdrop-blur-sm transition" title="Setări">
+                        <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
             </div>
 
             <div class="flex justify-between items-end mb-6 relative z-10">
                 <div>
-                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Balanță</p>
-                    <p class="text-3xl font-bold tracking-tight" id="balance">...</p>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Balanță Totală</p>
+                    <p class="text-4xl font-extrabold tracking-tight" id="balance">...</p>
                 </div>
                 <div class="text-right space-y-1">
                     <div class="flex items-center justify-end gap-2 text-emerald-400">
-                        <i class="fa-solid fa-arrow-down text-xs"></i><span class="font-bold" id="totalIncome">0</span>
+                        <i class="fa-solid fa-arrow-down text-xs"></i><span class="font-bold text-lg" id="totalIncome">0</span>
                     </div>
                     <div class="flex items-center justify-end gap-2 text-rose-400">
-                        <i class="fa-solid fa-arrow-up text-xs"></i><span class="font-bold" id="totalExpense">0</span>
+                        <i class="fa-solid fa-arrow-up text-xs"></i><span class="font-bold text-lg" id="totalExpense">0</span>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white/5 p-4 rounded-xl backdrop-blur-sm border border-white/10 relative z-10">
+            <div class="bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/10 relative z-10 shadow-lg">
                 <div class="h-40 w-full flex justify-center items-center">
                     <canvas id="expenseChart"></canvas>
                 </div>
@@ -67,103 +79,108 @@
 
         <div class="max-w-xl mx-auto px-4">
             
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6">
-                <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
-                    <button id="btnExpense" onclick="setType('Expense')" class="flex-1 py-2 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuială</button>
-                    <button id="btnIncome" onclick="setType('Income')" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all">Venit</button>
+            <div id="formCard" class="bg-white p-5 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 mb-6 transition-all duration-300">
+                
+                <div class="flex justify-between items-center mb-4 hidden" id="editHeader">
+                    <span class="text-xs font-bold text-blue-600 uppercase">Modifică Tranzacție</span>
+                    <button onclick="cancelEdit()" class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg">Anulează</button>
                 </div>
 
-                <div class="space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="date" id="dateInput" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600">
-                        <input type="number" id="amount" placeholder="Sumă (RON)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:outline-blue-500">
+                <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-4">
+                    <button id="btnExpense" onclick="setType('Expense')" class="touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuială</button>
+                    <button id="btnIncome" onclick="setType('Income')" class="touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all">Venit</button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-5 gap-3">
+                        <div class="col-span-2 relative">
+                             <input type="date" id="dateInput" class="w-full h-12 pl-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" id="amount" placeholder="Sumă" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-lg font-bold text-slate-800 placeholder-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
                     </div>
                     
-                    <select id="category" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-blue-500">
+                    <select id="category" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none">
                         </select>
 
-                    <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-blue-500">
+                    <input type="text" id="description" placeholder="Descriere (opțional)" class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
 
-                    <button id="saveBtn" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-slate-700 active:scale-95 transition-transform mt-2">
-                        Salvează
+                    <button id="saveBtn" class="touch-btn w-full bg-slate-800 text-white rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform mt-2 flex items-center justify-center gap-2">
+                        <span>Salvează</span>
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-10">
-                <div class="bg-slate-50 p-3 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-slate-700 font-bold text-sm">Tranzacții Recente</h2>
-                    <div id="syncStatus" class="text-[10px] text-emerald-500 font-bold"><i class="fa-solid fa-circle"></i> Live</div>
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-10 min-h-[200px]">
+                <div class="bg-slate-50/80 backdrop-blur p-4 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20">
+                    <h2 class="text-slate-700 font-bold text-sm">Istoric Tranzacții</h2>
+                    <div id="syncStatus" class="text-[10px] text-emerald-500 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 block"></span> Live</div>
                 </div>
-                <div id="transactionList" class="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
-                    <div class="p-4 text-center text-slate-400 text-sm">Se încarcă...</div>
+                <div id="transactionList" class="divide-y divide-slate-50">
+                    <div class="p-8 text-center text-slate-400 text-sm">Se încarcă datele...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="settingsOverlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="toggleSettings()"></div>
-    <div id="settingsPanel" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl z-50 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col">
+    <div id="settingsOverlay" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity" onclick="toggleSettings()"></div>
+    <div id="settingsPanel" class="fixed inset-x-0 bottom-0 bg-white rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col shadow-2xl">
         
-        <div class="w-full flex justify-center pt-3 pb-1" onclick="toggleSettings()">
+        <div class="w-full flex justify-center pt-4 pb-2" onclick="toggleSettings()">
             <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
         </div>
 
         <div class="flex-1 overflow-y-auto p-6">
-            
             <div class="flex items-center gap-4 mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <img id="settingUserPhoto" src="" class="w-12 h-12 rounded-full border-2 border-white shadow-sm">
+                <img id="settingUserPhoto" src="" class="w-12 h-12 rounded-full bg-slate-200">
                 <div class="flex-1">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Cont conectat</p>
-                    <p id="settingUserName" class="font-bold text-slate-800">User</p>
+                    <p class="text-xs text-slate-400 uppercase font-bold">Cont</p>
+                    <p id="settingUserName" class="font-bold text-slate-800 truncate">User</p>
                 </div>
-                <button id="logoutBtn" class="text-rose-500 text-sm font-bold bg-white px-3 py-2 rounded-lg shadow-sm border border-slate-100">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Ieșire
-                </button>
+                <button id="logoutBtn" class="text-rose-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-bold text-sm">Ieșire</button>
             </div>
 
-            <hr class="border-slate-100 mb-6">
-
-            <h3 class="font-bold text-lg mb-4">⚙️ Personalizare Categorii</h3>
+            <h3 class="font-bold text-lg mb-4 text-slate-800">Categorii Personalizate</h3>
             
             <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
-                <button onclick="renderSettingsCats('Expense')" id="setTabExp" class="flex-1 py-2 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuieli</button>
-                <button onclick="renderSettingsCats('Income')" id="setTabInc" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all">Venituri</button>
+                <button onclick="renderSettingsCats('Expense')" id="setTabExp" class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm">Cheltuieli</button>
+                <button onclick="renderSettingsCats('Income')" id="setTabInc" class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400">Venituri</button>
             </div>
 
             <div class="flex gap-2 mb-4">
-                <input type="text" id="newCatName" placeholder="Nume categorie nouă..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-blue-500">
-                <button onclick="addNewCategory()" class="bg-blue-600 text-white px-4 rounded-xl font-bold hover:bg-blue-700">
+                <input type="text" id="newCatName" placeholder="Categorie nouă..." class="flex-1 h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
+                <button onclick="addNewCategory()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg active:bg-blue-700 transition">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
 
-            <div id="settingsCatList" class="space-y-2">
+            <div id="settingsCatList" class="space-y-2 pb-10">
                 </div>
-
-            <div class="mt-8">
-                 <p class="text-xs text-slate-400 uppercase font-bold mb-2">Alte Opțiuni</p>
-                 <label class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition">
+            
+            <div class="mt-8 mb-10">
+                 <p class="text-xs text-slate-400 uppercase font-bold mb-3">Zonă Periculoasă</p>
+                 <label class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 active:bg-slate-100 transition">
                     <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center">
                         <i class="fa-solid fa-file-import"></i>
                     </div>
                     <div class="flex-1">
-                        <p class="font-bold text-sm">Importă JSON Vechi</p>
-                        <p class="text-xs text-slate-400">Recuperează datele vechi</p>
+                        <p class="font-bold text-sm text-slate-700">Importă JSON Vechi</p>
+                        <p class="text-xs text-slate-400">Restaurează date pierdute</p>
                     </div>
                     <input type="file" class="hidden" onchange="importData(this)">
                  </label>
             </div>
-            
-            <div class="h-20"></div> </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- 1. CONFIGURARE ---
+        // --- CONFIG ---
+        
         const firebaseConfig = {
             apiKey: "AIzaSyBIVp3XbgLUgu2Q06RxCo8oM5j4YIz9V7k",
             authDomain: "budgettracker-75aa0.firebaseapp.com",
@@ -179,16 +196,13 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // --- STATE ---
         let currentUser = null;
-        let unsubscribeTx = null;
-        let unsubscribeConfig = null;
         let currentType = 'Expense';
         let settingsTab = 'Expense';
         let chartInstance = null;
         let transactionsCache = [];
+        let editingId = null; // Pentru Edit Mode
         
-        // Default Arrays (daca userul e nou)
         let userConfig = {
             expenseCats: ["Car Expenses", "House & Utilities", "Groceries", "Dining Out", "Nightlife", "Entertainment", "Savings"],
             incomeCats: ["Salary", "Parents", "Friends", "Other"]
@@ -198,9 +212,8 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                // Update UI Profile
                 document.getElementById('settingUserName').innerText = user.displayName;
-                document.getElementById('settingUserPhoto').src = user.photoURL;
+                document.getElementById('settingUserPhoto').src = user.photoURL || 'https://via.placeholder.com/50';
                 
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
@@ -214,45 +227,33 @@
         });
 
         document.getElementById('googleLoginBtn').addEventListener('click', () => signInWithPopup(auth, provider));
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            toggleSettings(); // inchide meniu
-            signOut(auth);
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => { toggleSettings(); signOut(auth); });
 
-        // --- DATA SYNC ---
-        async function initAppData() {
+        // --- CORE LOGIC ---
+        function initAppData() {
             window.setType('Expense'); 
             document.getElementById('dateInput').valueAsDate = new Date();
 
-            // 1. Sync Categories (Config)
+            // Sync Config
             const configRef = doc(db, "users", currentUser.uid, "settings", "config");
-            unsubscribeConfig = onSnapshot(configRef, async (snap) => {
-                if (snap.exists()) {
-                    userConfig = snap.data();
-                } else {
-                    // Create defaults if new user
-                    await setDoc(configRef, userConfig);
-                }
-                // Refresh UI with new cats
-                window.setType(currentType);
-                if(document.getElementById('settingsPanel').classList.contains('translate-y-0')) {
-                    window.renderSettingsCats(settingsTab);
-                }
+            onSnapshot(configRef, (snap) => {
+                if (snap.exists()) userConfig = snap.data();
+                else setDoc(configRef, userConfig);
+                window.setType(currentType); // Refresh dropdown
+                if(document.getElementById('settingsPanel').classList.contains('translate-y-0')) window.renderSettingsCats(settingsTab);
             });
 
-            // 2. Sync Transactions
+            // Sync Transacții
             const q = query(collection(db, "users", currentUser.uid, "transactions"), orderBy("date", "desc"));
-            unsubscribeTx = onSnapshot(q, (snapshot) => {
-                const transactions = [];
-                snapshot.forEach((doc) => {
-                    transactions.push({ id: doc.id, ...doc.data() });
-                });
-                transactionsCache = transactions;
-                renderApp(transactions);
+            onSnapshot(q, (snapshot) => {
+                const txs = [];
+                snapshot.forEach((d) => txs.push({ id: d.id, ...d.data() }));
+                transactionsCache = txs;
+                renderApp(txs);
             });
         }
 
-        // --- TRANSACTION LOGIC ---
+        // --- ADD / EDIT / DELETE ---
         document.getElementById('saveBtn').addEventListener('click', async () => {
             const amount = parseFloat(document.getElementById('amount').value);
             const dateVal = document.getElementById('dateInput').value;
@@ -262,131 +263,77 @@
             if(!amount) { alert("Introdu suma!"); return; }
 
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "⏳"; btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>"; 
+            btn.disabled = true;
 
             try {
-                await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                    date: dateVal, amount: amount, category: cat, description: desc, type: currentType, createdAt: new Date()
-                });
-                document.getElementById('amount').value = '';
-                document.getElementById('description').value = '';
-                btn.innerText = "Salvează"; btn.disabled = false;
-            } catch (e) { alert(e.message); btn.disabled = false; }
+                if(editingId) {
+                    // UPDATE existent
+                    await updateDoc(doc(db, "users", currentUser.uid, "transactions", editingId), {
+                        date: dateVal, amount: amount, category: cat, description: desc, type: currentType
+                    });
+                    window.cancelEdit(); // Iesi din edit mode
+                } else {
+                    // CREATE nou
+                    await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+                        date: dateVal, amount: amount, category: cat, description: desc, type: currentType, createdAt: new Date()
+                    });
+                    // Reset fields only on new add
+                    document.getElementById('amount').value = '';
+                    document.getElementById('description').value = '';
+                }
+            } catch (e) { alert("Eroare: " + e.message); }
+            
+            btn.innerHTML = originalText; 
+            btn.disabled = false;
         });
 
+        // Functie pentru a porni editarea (Populeaza formularul)
+        window.editTx = (id) => {
+            const tx = transactionsCache.find(t => t.id === id);
+            if(!tx) return;
+
+            editingId = id;
+            
+            // Schimba UI in modul Edit
+            document.getElementById('editHeader').classList.remove('hidden');
+            document.getElementById('saveBtn').innerHTML = "Actualizează Tranzacția";
+            document.getElementById('saveBtn').classList.remove('bg-slate-800');
+            document.getElementById('saveBtn').classList.add('bg-blue-600');
+            
+            // Scroll sus la formular
+            document.getElementById('appScreen').scrollIntoView({ behavior: 'smooth' });
+
+            // Populeaza campurile
+            window.setType(tx.type); // Seteaza tabul corect
+            setTimeout(() => {
+                document.getElementById('dateInput').value = tx.date;
+                document.getElementById('amount').value = tx.amount;
+                document.getElementById('category').value = tx.category;
+                document.getElementById('description').value = tx.description;
+            }, 50);
+        }
+
+        window.cancelEdit = () => {
+            editingId = null;
+            document.getElementById('editHeader').classList.add('hidden');
+            document.getElementById('saveBtn').innerHTML = "Salvează";
+            document.getElementById('saveBtn').classList.add('bg-slate-800');
+            document.getElementById('saveBtn').classList.remove('bg-blue-600');
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('dateInput').valueAsDate = new Date();
+        }
+
         window.deleteTx = async (id) => {
-            if(confirm("Ștergi?")) await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
-        }
-
-        // --- SETTINGS & CATEGORY MANAGER ---
-        
-        window.toggleSettings = () => {
-            const panel = document.getElementById('settingsPanel');
-            const overlay = document.getElementById('settingsOverlay');
-            
-            if (panel.classList.contains('translate-y-full')) {
-                // Open
-                panel.classList.remove('translate-y-full', 'translate-y-0');
-                panel.classList.add('translate-y-0'); // Slide up
-                overlay.classList.remove('hidden');
-                window.renderSettingsCats('Expense'); // default tab
-            } else {
-                // Close
-                panel.classList.add('translate-y-full');
-                panel.classList.remove('translate-y-0');
-                overlay.classList.add('hidden');
+            if(confirm("Ștergi definitiv?")) {
+                if(editingId === id) window.cancelEdit();
+                await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
             }
         }
 
-        window.renderSettingsCats = (tabType) => {
-            settingsTab = tabType;
-            const list = document.getElementById('settingsCatList');
-            const btnExp = document.getElementById('setTabExp');
-            const btnInc = document.getElementById('setTabInc');
-
-            // UI Tabs
-            if(tabType === 'Expense') {
-                btnExp.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
-                btnInc.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all";
-            } else {
-                btnExp.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all";
-                btnInc.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
-            }
-
-            // Render List
-            list.innerHTML = '';
-            const cats = tabType === 'Expense' ? userConfig.expenseCats : userConfig.incomeCats;
-
-            cats.forEach(cat => {
-                const item = document.createElement('div');
-                item.className = "flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100";
-                item.innerHTML = `
-                    <span class="font-medium text-sm text-slate-700">${cat}</span>
-                    <button onclick="removeCategory('${cat}')" class="text-slate-300 hover:text-red-500 p-2">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        window.addNewCategory = async () => {
-            const input = document.getElementById('newCatName');
-            const name = input.value.trim();
-            if(!name) return;
-
-            const configRef = doc(db, "users", currentUser.uid, "settings", "config");
-            let newCats = settingsTab === 'Expense' ? [...userConfig.expenseCats] : [...userConfig.incomeCats];
-            
-            if(newCats.includes(name)) { alert("Există deja!"); return; }
-            newCats.push(name);
-
-            if(settingsTab === 'Expense') await updateDoc(configRef, { expenseCats: newCats });
-            else await updateDoc(configRef, { incomeCats: newCats });
-
-            input.value = '';
-        }
-
-        window.removeCategory = async (name) => {
-            if(!confirm(`Ștergi categoria "${name}"? (Tranzacțiile vechi rămân)`)) return;
-            
-            const configRef = doc(db, "users", currentUser.uid, "settings", "config");
-            let newCats = settingsTab === 'Expense' ? [...userConfig.expenseCats] : [...userConfig.incomeCats];
-            
-            newCats = newCats.filter(c => c !== name);
-
-            if(settingsTab === 'Expense') await updateDoc(configRef, { expenseCats: newCats });
-            else await updateDoc(configRef, { incomeCats: newCats });
-        }
-
-        // --- CORE UI ---
-        window.setType = (type) => {
-            currentType = type;
-            const btnExp = document.getElementById('btnExpense');
-            const btnInc = document.getElementById('btnIncome');
-            const catSelect = document.getElementById('category');
-            
-            // Populate using DYNAMIC config
-            catSelect.innerHTML = '';
-            const list = type === 'Expense' ? userConfig.expenseCats : userConfig.incomeCats;
-            
-            if(list) {
-                list.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c; opt.innerText = c;
-                    catSelect.appendChild(opt);
-                });
-            }
-
-            if(type === 'Expense') {
-                btnExp.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
-                btnInc.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all";
-            } else {
-                btnExp.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 transition-all";
-                btnInc.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
-            }
-        }
-
+        // --- RENDER ---
         function renderApp(transactions) {
             const list = document.getElementById('transactionList');
             list.innerHTML = '';
@@ -399,28 +346,36 @@
                 if(t.type === 'Income') inc += t.amount;
                 else {
                     exp += t.amount;
-                    if(!catTotals[t.category]) catTotals[t.category] = 0;
-                    catTotals[t.category] += t.amount;
+                    catTotals[t.category] = (catTotals[t.category] || 0) + t.amount;
                 }
 
                 const isInc = t.type === 'Income';
                 const dateDisp = new Date(t.date).toLocaleDateString('ro-RO', {day:'numeric', month:'short'});
                 
+                // Card Tranzactie optimizat pt Mobile
                 const div = document.createElement('div');
-                div.className = "p-4 hover:bg-slate-50 flex justify-between items-center group";
+                div.className = "p-4 flex justify-between items-center active:bg-slate-50 transition-colors";
                 div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                    <div class="flex items-center gap-3.5 overflow-hidden">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-500 text-sm">
                            <i class="fa-solid fa-receipt"></i>
                         </div>
-                        <div>
-                            <p class="font-bold text-slate-700 text-sm">${t.description}</p>
-                            <p class="text-xs text-slate-400">${dateDisp} • ${t.category}</p>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-700 text-sm truncate pr-2">${t.description}</p>
+                            <p class="text-xs text-slate-400 font-medium">${dateDisp} • ${t.category}</p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}">${isInc ? '+' : '-'}${t.amount}</p>
-                        <button onclick="deleteTx('${t.id}')" class="text-[10px] text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">Șterge</button>
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
+                        <p class="font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'} text-base">${isInc ? '+' : '-'}${t.amount}</p>
+                        
+                        <div class="flex gap-3 mt-0.5">
+                            <button onclick="editTx('${t.id}')" class="text-slate-300 hover:text-blue-500 p-1">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 p-1">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 list.appendChild(div);
@@ -442,46 +397,110 @@
                     datasets: [{
                         data: Object.values(totals),
                         backgroundColor: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#6366f1'],
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverOffset: 10
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, cutout: '70%' }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, cutout: '75%' }
             });
         }
 
-        // --- EXPORT / IMPORT ---
-        window.exportData = () => {
-            if(!transactionsCache.length) { alert("Nimic de exportat!"); return; }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactionsCache));
-            const node = document.createElement('a');
-            node.href = dataStr;
-            node.download = `budget_backup.json`;
-            node.click();
+        // --- SETTINGS UI ---
+        window.toggleSettings = () => {
+            const panel = document.getElementById('settingsPanel');
+            const overlay = document.getElementById('settingsOverlay');
+            if (panel.classList.contains('translate-y-full')) {
+                panel.classList.remove('translate-y-full'); panel.classList.add('translate-y-0');
+                overlay.classList.remove('hidden'); overlay.classList.remove('opacity-0');
+                window.renderSettingsCats('Expense');
+            } else {
+                panel.classList.add('translate-y-full'); panel.classList.remove('translate-y-0');
+                overlay.classList.add('hidden'); overlay.classList.add('opacity-0');
+            }
         }
 
-        window.importData = (input) => {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = JSON.parse(e.target.result);
-                if(Array.isArray(data)) {
-                    if(!confirm(`Importă ${data.length} tranzacții?`)) return;
-                    for (const t of data) {
-                        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                            date: t.date || new Date().toISOString().slice(0,10),
-                            amount: parseFloat(t.amount),
-                            category: t.category,
-                            description: t.description || t.category,
-                            type: t.type || 'Expense',
-                            createdAt: new Date()
-                        });
-                    }
-                    alert("Gata!");
-                    toggleSettings(); // Close menu if open
+        window.setType = (type) => {
+            currentType = type;
+            const btnExp = document.getElementById('btnExpense');
+            const btnInc = document.getElementById('btnIncome');
+            const catSelect = document.getElementById('category');
+            
+            catSelect.innerHTML = '';
+            const list = type === 'Expense' ? userConfig.expenseCats : userConfig.incomeCats;
+            if(list) list.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.innerText = c; catSelect.appendChild(opt);
+            });
+
+            if(type === 'Expense') {
+                btnExp.className = "touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
+                btnInc.className = "touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all";
+            } else {
+                btnExp.className = "touch-btn flex-1 rounded-xl text-sm font-bold text-slate-400 transition-all";
+                btnInc.className = "touch-btn flex-1 rounded-xl text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
+            }
+        }
+        
+        // --- CATEGORY MANAGER ---
+        window.renderSettingsCats = (tab) => {
+            settingsTab = tab;
+            const list = document.getElementById('settingsCatList');
+            const btnExp = document.getElementById('setTabExp');
+            const btnInc = document.getElementById('setTabInc');
+
+            if(tab === 'Expense') {
+                btnExp.className = "flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all";
+                btnInc.className = "flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all";
+            } else {
+                btnExp.className = "flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all";
+                btnInc.className = "flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-emerald-600 shadow-sm transition-all";
+            }
+
+            list.innerHTML = '';
+            const cats = tab === 'Expense' ? userConfig.expenseCats : userConfig.incomeCats;
+            cats.forEach(c => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100";
+                item.innerHTML = `
+                    <span class="font-bold text-sm text-slate-700">${c}</span>
+                    <button onclick="removeCat('${c}')" class="text-slate-300 hover:text-red-500 w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        window.addNewCategory = async () => {
+            const input = document.getElementById('newCatName');
+            const name = input.value.trim();
+            if(!name) return;
+            const ref = doc(db, "users", currentUser.uid, "settings", "config");
+            let list = settingsTab === 'Expense' ? [...userConfig.expenseCats] : [...userConfig.incomeCats];
+            if(!list.includes(name)) {
+                list.push(name);
+                await updateDoc(ref, settingsTab === 'Expense' ? { expenseCats: list } : { incomeCats: list });
+            }
+            input.value = '';
+        }
+
+        window.removeCat = async (name) => {
+            if(!confirm("Ștergi categoria?")) return;
+            const ref = doc(db, "users", currentUser.uid, "settings", "config");
+            let list = settingsTab === 'Expense' ? [...userConfig.expenseCats] : [...userConfig.incomeCats];
+            list = list.filter(c => c !== name);
+            await updateDoc(ref, settingsTab === 'Expense' ? { expenseCats: list } : { incomeCats: list });
+        }
+
+        window.importData = (i) => {
+            const f = i.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = async(e) => {
+                const d = JSON.parse(e.target.result);
+                if(confirm(`Import ${d.length} iteme?`)) {
+                    for(const t of d) await addDoc(collection(db,"users",currentUser.uid,"transactions"),{...t, createdAt:new Date()});
+                    alert("Import complet!"); toggleSettings();
                 }
             };
-            reader.readAsText(file);
+            r.readAsText(f);
         }
     </script>
 </body>

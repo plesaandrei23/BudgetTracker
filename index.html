@@ -5,228 +5,338 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
-
     <title>Budget Pro</title>
+
+    <!-- External Libs -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rev: {
+                            bg: '#0f172a',      /* Slate 900 */
+                            card: '#1e293b',    /* Slate 800 */
+                            accent: '#3b82f6',  /* Blue 500 */
+                            text: '#f1f5f9',    /* Slate 100 */
+                            sub: '#94a3b8'      /* Slate 400 */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        /* No scroll on body, handled by main */
         body {
-            background-color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
             overscroll-behavior-y: none;
         }
 
+        /* Hidden utilities */
         .hidden {
             display: none !important;
         }
 
-        ::-webkit-scrollbar {
-            width: 4px;
+        /* Hide scrollbars but allow scrolling */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
         }
 
-        ::-webkit-scrollbar-track {
-            background: transparent;
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+        /* Remove spin buttons from inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Safe area padding for bottom nav */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
 </head>
 
-<body class="text-slate-800 h-screen flex flex-col">
+<body class="h-screen w-screen overflow-hidden flex flex-col bg-rev-bg text-rev-text">
 
-    <div id="loginScreen"
-        class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center text-white p-6 hidden">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 z-[100] bg-rev-bg flex flex-col items-center justify-center p-6 hidden">
         <div
-            class="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/20">
-            <i class="fa-solid fa-wallet text-5xl"></i>
+            class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+            <i class="fa-solid fa-wallet text-4xl text-white"></i>
         </div>
-        <h1 class="text-4xl font-bold mb-3 tracking-tight">Budget Pro</h1>
-        <p class="text-slate-400 mb-12 text-center">Gestionează-ți banii inteligent.</p>
+        <h1 class="text-3xl font-bold mb-2">Budget Pro</h1>
+        <p class="text-rev-sub mb-8">Financial Freedom</p>
         <button id="googleLoginBtn"
-            class="bg-white text-slate-900 px-8 py-4 rounded-xl font-bold flex items-center gap-3 hover:bg-slate-100 active:scale-95 transition shadow-xl w-full max-w-sm justify-center">
-            <i class="fa-brands fa-google text-red-500 text-xl"></i> Autentificare Google
+            class="bg-white text-slate-900 px-8 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg active:scale-95 transition">
+            <i class="fa-brands fa-google text-red-500"></i> Login with Google
         </button>
     </div>
 
+    <!-- APP HEADER (Fixed) -->
     <header id="appHeader"
-        class="bg-slate-900 text-white pt-[max(15px,env(safe-area-inset-top))] pb-6 px-6 shadow-xl relative z-10 hidden shrink-0">
-        <div class="max-w-5xl mx-auto w-full">
-            <div class="flex justify-between items-center mb-6 mt-2">
-                <div class="flex items-center gap-3">
-                    <img id="userPhoto" src="" class="w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800">
-                    <div>
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Salut,</p>
-                        <p id="userName" class="text-sm font-bold leading-none">User</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportData()"
-                        class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                    </button>
-                    <button onclick="toggleSettings()"
-                        class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
-                        <i class="fa-solid fa-gear"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                <div class="col-span-2">
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Balanță</p>
-                    <p class="text-4xl font-extrabold tracking-tight" id="balance">0.00 Lei</p>
-                </div>
-                <div
-                    class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] text-emerald-400 font-bold uppercase">Venit</p>
-                        <p class="font-bold text-emerald-400 text-lg" id="totalIncome">0</p>
-                    </div>
-                    <i class="fa-solid fa-arrow-down text-emerald-500/50 text-xl"></i>
-                </div>
-                <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] text-rose-400 font-bold uppercase">Cheltuieli</p>
-                        <p class="font-bold text-rose-400 text-lg" id="totalExpense">0</p>
-                    </div>
-                    <i class="fa-solid fa-arrow-up text-rose-500/50 text-xl"></i>
-                </div>
-            </div>
+        class="h-16 flex items-center justify-between px-4 border-b border-white/5 bg-rev-bg/95 backdrop-blur z-50 hidden">
+        <!-- Dynamic Header Content -->
+        <div id="headerTitle" class="font-bold text-lg">Dashboard</div>
+        <div id="headerActions">
+            <!-- Injected by JS -->
         </div>
     </header>
 
-    <main id="mainContent" class="flex-1 overflow-y-auto bg-slate-50 hidden relative">
-        <div class="max-w-5xl mx-auto w-full p-4 md:p-8 md:grid md:grid-cols-12 md:gap-8">
+    <!-- MAIN CONTENT (Scrollable) -->
+    <main id="mainContainer" class="flex-1 overflow-y-auto relative hidden">
 
-            <div class="md:col-span-5 space-y-6">
+        <!-- VIEW: HOME -->
+        <section id="view-home" class="min-h-full pb-24">
 
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 relative">
-                    <h3 class="text-sm font-bold text-slate-700 mb-4">Analiză Cheltuieli</h3>
+            <!-- Account Cards -->
+            <div class="p-4 overflow-x-auto scrollbar-hide flex gap-3 snap-x snap-mandatory" id="accountsList">
+                <!-- JS Injected -->
+            </div>
 
-                    <div class="relative h-48 w-full flex justify-center items-center">
-                        <canvas id="expenseChart" class="z-10 relative"></canvas>
+            <!-- Total Balance Display (if needed distinct from cards) -->
+            <!-- We'll stick to Revolut style: Cards serve as balances -->
 
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-                            <p class="text-xs text-slate-400 font-bold uppercase">Total</p>
-                            <p class="text-xl font-bold text-slate-800" id="chartTotal">0</p>
-                        </div>
-                    </div>
+            <!-- Transaction List -->
+            <div id="transactionList" class="px-4 space-y-1">
+                <!-- Date Headers & Items Injected Here -->
+            </div>
+
+        </section>
+
+        <section id="view-analytics" class="min-h-full p-4 pb-24 hidden">
+            <!-- Timeframe Navigation -->
+            <div class="flex flex-col gap-4 mb-6">
+                <!-- Mode Selection -->
+                <div class="bg-neutral-800 p-1 rounded-xl flex text-xs font-bold text-neutral-400">
+                    <button onclick="changeAnalyticsMode('week')" id="btn-mode-week"
+                        class="flex-1 py-2 rounded-lg bg-neutral-700 text-white shadow-md transition-all">Week</button>
+                    <button onclick="changeAnalyticsMode('month')" id="btn-mode-month"
+                        class="flex-1 py-2 rounded-lg hover:text-white transition-all">Month</button>
+                    <button onclick="changeAnalyticsMode('year')" id="btn-mode-year"
+                        class="flex-1 py-2 rounded-lg hover:text-white transition-all">Year</button>
                 </div>
 
-                <div id="formCard" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 sticky top-4">
-                    <div id="editHeader"
-                        class="flex justify-between items-center mb-4 hidden bg-blue-50 p-2.5 rounded-xl border border-blue-100">
-                        <span class="text-xs font-bold text-blue-600 uppercase flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Modifici Tranzacție
-                        </span>
-                        <button onclick="cancelEdit()"
-                            class="w-6 h-6 rounded-full bg-white text-slate-400 hover:text-red-500 flex items-center justify-center shadow-sm"><i
-                                class="fa-solid fa-xmark text-xs"></i></button>
-                    </div>
+                <!-- Date Scroller -->
+                <div
+                    class="flex items-center justify-between bg-neutral-800 px-4 py-3 rounded-2xl shadow-lg border border-neutral-700">
+                    <button onclick="changeAnalyticsDate(-1)"
+                        class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-neutral-300 hover:bg-neutral-600 active:scale-95 transition">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
 
-                    <div class="flex bg-slate-100 p-1.5 rounded-xl mb-4">
-                        <button id="btnExpense" onclick="setType('Expense')"
-                            class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuială</button>
-                        <button id="btnIncome" onclick="setType('Income')"
-                            class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all">Venit</button>
-                    </div>
+                    <span id="analytics-date-label" class="text-sm font-bold text-white tracking-wide">Jan 15 - Jan
+                        21</span>
 
-                    <div class="flex bg-slate-100 p-1.5 rounded-xl mb-4">
-                        <button id="btnCash" onclick="togglePaymentMethod('Cash')"
-                            class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-slate-800 shadow-sm transition-all">Cash</button>
-                        <button id="btnCard" onclick="togglePaymentMethod('Card')"
-                            class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all">Card</button>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <input type="date" id="dateInput"
-                                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-blue-500">
-                            <input type="number" id="amount" placeholder="Sumă"
-                                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <select id="category"
-                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500"></select>
-                        <select id="cardSelect"
-                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 hidden"></select>
-                        <input type="text" id="description" placeholder="Descriere (opțional)"
-                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                        <button id="saveBtn"
-                            class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-slate-800 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mt-2">Salvează</button>
-                    </div>
+                    <button onclick="changeAnalyticsDate(1)"
+                        class="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-neutral-300 hover:bg-neutral-600 active:scale-95 transition">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="md:col-span-7 mt-6 md:mt-0">
-                <div class="flex justify-between items-center mb-4 px-1">
-                    <h2 class="text-slate-800 font-bold text-lg">Tranzacții</h2>
-                    <div
-                        class="text-[10px] font-bold bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sync
-                    </div>
-                </div>
-                <div id="transactionList" class="space-y-3 pb-24 md:pb-0">
-                    <div class="p-10 text-center text-slate-400 text-sm">Se încarcă...</div>
+            <!-- Insights Container -->
+            <div id="insightsContainer" class="space-y-6">
+                <!-- Dynamic Content Will Be Injected Here via JS -->
+            </div>
+
+            <!-- Category Breakdown List (Generated via JS) -->
+            <div id="analyticsBreakdown" class="space-y-4 pb-24"></div>
+        </section>
+
+        <!-- VIEW: GOALS -->
+        <section id="view-goals"
+            class="min-h-full p-4 pb-24 hidden flex flex-col items-center justify-center text-center space-y-6">
+            <div
+                class="w-20 h-20 rounded-full bg-neutral-800 flex items-center justify-center mb-2 shadow-lg shadow-purple-500/20">
+                <i class="fa-solid fa-bullseye text-3xl text-purple-500"></i>
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-2">Goals & Allocation</h2>
+                <div
+                    class="inline-block bg-neutral-800 border border-neutral-700 px-3 py-1 rounded-full text-xs font-bold text-neutral-400 uppercase tracking-widest">
+                    Coming Soon
                 </div>
             </div>
-        </div>
+
+            <div class="bg-neutral-800/50 p-6 rounded-2xl border border-dashed border-neutral-700 max-w-xs mx-auto">
+                <p class="text-sm text-neutral-300 italic leading-relaxed">
+                    "Optiunea de a seta goals si a aloca bani pentru ele. Sa apara frumos cu piechart, cat % sunt
+                    finalizate si cand sunt gata."
+                </p>
+            </div>
+        </section>
+
+        <!-- VIEW: SETTINGS -->
+        <section id="view-settings" class="min-h-full p-4 pb-24 hidden">
+            <!-- User Info -->
+            <div class="flex items-center gap-4 mb-8 p-4 bg-rev-card rounded-2xl border border-white/5">
+                <img id="userPhoto" src="" class="w-12 h-12 rounded-full">
+                <div>
+                    <h2 id="userName" class="font-bold text-lg">User</h2>
+                    <p id="userEmail" class="text-xs text-rev-sub">email@example.com</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-3">
+                <div class="bg-rev-card rounded-2xl overflow-hidden border border-white/5">
+                    <button onclick="triggerImport()"
+                        class="w-full flex items-center justify-between p-4 hover:bg-white/5 transition border-b border-white/5">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-file-import text-blue-400"></i>
+                            Import JSON</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-rev-sub"></i>
+                    </button>
+                    <button onclick="exportData()"
+                        class="w-full flex items-center justify-between p-4 hover:bg-white/5 transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-download text-emerald-400"></i>
+                            Export JSON</span>
+                        <i class="fa-solid fa-chevron-right text-xs text-rev-sub"></i>
+                    </button>
+                </div>
+
+                <div class="bg-rev-card rounded-2xl overflow-hidden border border-white/5">
+                    <button id="logoutBtn"
+                        class="w-full flex items-center justify-between p-4 hover:bg-red-500/10 transition text-red-500">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-right-from-bracket"></i> Log
+                            Out</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden Import Input -->
+            <input type="file" id="importFile" accept=".json" class="hidden" onchange="handleImportFile(this)">
+        </section>
+
     </main>
 
-    <div id="settingsOverlay"
-        class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm hidden flex items-end md:items-center justify-center"
-        onclick="toggleSettings()">
-        <div id="settingsPanel"
-            class="w-full h-[85vh] md:h-auto md:max-w-md bg-white rounded-t-[2rem] md:rounded-2xl shadow-2xl flex flex-col hidden"
-            onclick="event.stopPropagation()">
-            <div class="w-full flex justify-center pt-4 pb-2 md:hidden" onclick="toggleSettings()">
-                <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+    <!-- BOTTOM NAV (Fixed) -->
+    <nav id="bottomNav"
+        class="h-[calc(4rem+env(safe-area-inset-bottom))] pb-safe bg-rev-bg/95 backdrop-blur border-t border-white/5 flex items-center justify-around z-50 hidden">
+        <!-- 1. HOME -->
+        <button onclick="navigateTo('home')" class="nav-btn flex flex-col items-center gap-1 text-blue-500 w-16"
+            data-target="home">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </button>
+
+        <!-- 2. GOALS -->
+        <button onclick="navigateTo('goals')" class="nav-btn flex flex-col items-center gap-1 text-rev-sub w-16"
+            data-target="goals">
+            <i class="fa-solid fa-bullseye text-xl"></i>
+            <span class="text-[10px] font-medium">Goals</span>
+        </button>
+
+        <!-- 3. ADD (Center) -->
+        <button onclick="openAddModal()"
+            class="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center -mt-6 shadow-lg shadow-blue-500/40 text-white active:scale-95 transition">
+            <i class="fa-solid fa-plus text-xl"></i>
+        </button>
+
+        <!-- 4. ANALYTICS -->
+        <button onclick="navigateTo('analytics')" class="nav-btn flex flex-col items-center gap-1 text-rev-sub w-16"
+            data-target="analytics">
+            <i class="fa-solid fa-chart-pie text-xl"></i>
+            <span class="text-[10px] font-medium">Analytics</span>
+        </button>
+
+        <!-- 5. SETTINGS -->
+        <button onclick="navigateTo('settings')" class="nav-btn flex flex-col items-center gap-1 text-rev-sub w-16"
+            data-target="settings">
+            <i class="fa-solid fa-gear text-xl"></i>
+            <span class="text-[10px] font-medium">Settings</span>
+        </button>
+    </nav>
+
+    <!-- MODAL: ADD TRANSACTION -->
+    <div id="addModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAddModal()"></div>
+        <div
+            class="absolute bottom-0 w-full bg-rev-card rounded-t-3xl p-6 pb-12 animate-slide-up max-h-[90vh] overflow-y-auto">
+
+            <!-- Dragger -->
+            <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-6"></div>
+
+            <div class="flex gap-2 bg-slate-800 p-1 rounded-xl mb-6">
+                <button onclick="setType('Expense')" id="btnEp"
+                    class="flex-1 py-2 rounded-lg text-sm font-bold bg-rev-card shadow text-white">Expense</button>
+                <button onclick="setType('Income')" id="btnIn"
+                    class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-400">Income</button>
+                <button onclick="setType('Transfer')" id="btnTr"
+                    class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-400">Transfer</button>
             </div>
-            <div class="hidden md:flex justify-between items-center p-6 pb-0">
-                <h3 class="font-bold text-xl text-slate-800">Setări</h3>
-                <button onclick="toggleSettings()"
-                    class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><i
-                        class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6">
-                <h3 class="font-bold text-lg mb-4 text-slate-800 md:hidden">Setări Categorii</h3>
-                <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
-                    <button onclick="renderSettingsCats('Expense')" id="setTabExp"
-                        class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-rose-600 shadow-sm transition-all">Cheltuieli</button>
-                    <button onclick="renderSettingsCats('Income')" id="setTabInc"
-                        class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all">Venituri</button>
-                    <button onclick="renderSettingsCats('Cards')" id="setTabCards"
-                        class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-400 transition-all">Carduri</button>
+
+            <div class="space-y-4">
+                <!-- Amount -->
+                <div class="relative">
+                    <input type="number" id="inpAmount" placeholder="0"
+                        class="w-full bg-transparent text-center text-4xl font-bold border-b border-slate-700 pb-2 focus:border-blue-500 outline-none text-white">
+                    <span class="absolute right-4 top-2 text-sm font-bold text-slate-500">RON</span>
                 </div>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="newCatName" placeholder="Nume categorie..."
-                        class="flex-1 h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium">
-                    <button onclick="addNewCategory()"
-                        class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg hover:bg-blue-700 transition"><i
-                            class="fa-solid fa-plus"></i></button>
+
+                <!-- From Account -->
+                <div>
+                    <label class="text-xs uppercase font-bold text-slate-500 ml-1">From Account</label>
+                    <select id="inpAccount"
+                        class="w-full bg-slate-800 p-3 rounded-xl mt-1 outline-none border border-transparent focus:border-blue-500 text-white appearance-none"></select>
                 </div>
-                <div id="settingsCatList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
-                <div class="mt-8 pt-4 border-t border-slate-100">
-                    <button id="logoutBtn"
-                        class="w-full text-rose-500 bg-rose-50 hover:bg-rose-100 py-3.5 rounded-xl font-bold text-sm border border-rose-100 transition">Ieșire
-                        din cont</button>
+
+                <!-- To Account (Transfer only) -->
+                <div id="fieldToAccount" class="hidden">
+                    <label class="text-xs uppercase font-bold text-slate-500 ml-1">To Account</label>
+                    <select id="inpToAccount"
+                        class="w-full bg-slate-800 p-3 rounded-xl mt-1 outline-none text-white appearance-none"></select>
                 </div>
+
+                <!-- Category (Exp/Inc only) -->
+                <div id="fieldCategory">
+                    <label class="text-xs uppercase font-bold text-slate-500 ml-1">Category</label>
+                    <div id="catList" class="flex gap-2 overflow-x-auto py-2"></div>
+                    <input type="hidden" id="inpCategory">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="text-xs uppercase font-bold text-slate-500 ml-1">Description</label>
+                    <input type="text" id="inpDesc"
+                        class="w-full bg-slate-800 p-3 rounded-xl mt-1 outline-none text-white"
+                        placeholder="What is this for?">
+                </div>
+
+                <!-- Date -->
+                <div>
+                    <label class="text-xs uppercase font-bold text-slate-500 ml-1">Date</label>
+                    <input type="date" id="inpDate"
+                        class="w-full bg-slate-800 p-3 rounded-xl mt-1 outline-none text-white">
+                </div>
+
+                <!-- TIP (PFA Business only) -->
+                <div id="fieldTip" class="hidden">
+                    <label class="text-xs uppercase font-bold text-emerald-500 ml-1">Tip Amount (Bacșiș)</label>
+                    <input type="number" id="inpTip" placeholder="0.00"
+                        class="w-full bg-slate-800 p-3 rounded-xl mt-1 outline-none border border-emerald-500/50 text-emerald-400">
+                </div>
+
+                <button onclick="saveTransaction()"
+                    class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white mt-4 shadow-lg active:scale-95 transition">
+                    Save Transaction
+                </button>
             </div>
         </div>
     </div>

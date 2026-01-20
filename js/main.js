@@ -1,149 +1,107 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { auth } from "./firebase.js";
-import { state, setState } from "./state.js";
-import { subscribeToConfig, subscribeToTransactions, addTransaction, updateTransaction, deleteTransaction, updateConfig } from "./db.js";
-import { loginWithGoogle, logout } from "./auth.js";
-import { toggleSettings, setType, renderSettingsCats, renderApp, editTx, cancelEdit, togglePaymentMethod } from "./ui.js";
+import { auth } from './firebase.js';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { state, setState } from './state.js';
+import { subscribeToConfig, subscribeToTransactions } from './db.js';
+import * as UI from './ui.js';
+import { renderAnalytics, changeAnalyticsMode, changeAnalyticsDate } from './charts.js';
 
-// -- Initial Setup --
+// --- ROUTER ---
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        setState('currentUser', user);
-        document.getElementById('userName').innerText = user.displayName;
-        document.getElementById('userPhoto').src = user.photoURL;
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('appHeader').classList.remove('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
-        initAppData();
-    } else {
-        setState('currentUser', null);
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('appHeader').classList.add('hidden');
-        document.getElementById('mainContent').classList.add('hidden');
-    }
-});
+function navigateTo(view) {
+    setState('currentView', view);
+    UI.updateNavState(view);
+}
 
-function initAppData() {
-    setType('Expense');
-    togglePaymentMethod('Cash');
-    document.getElementById('dateInput').valueAsDate = new Date();
+// --- APP INIT ---
 
-    subscribeToConfig(state.currentUser.uid, (config) => {
-        setType(state.currentType);
-    });
+function initApp() {
+    // Auth Listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            setState('currentUser', user);
+            // Show App, Hide Login
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('mainContainer').classList.remove('hidden');
+            document.getElementById('bottomNav').classList.remove('hidden');
 
-    subscribeToTransactions(state.currentUser.uid, (transactions) => {
-        renderApp(transactions);
+            // User Info
+            document.getElementById('userPhoto').src = user.photoURL;
+            document.getElementById('userName').innerText = user.displayName;
+            document.getElementById('userEmail').innerText = user.email;
+
+            // Load Data
+            loadUserData(user.uid);
+
+            // Determine start view
+            navigateTo('home');
+        } else {
+            setState('currentUser', null);
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('mainContainer').classList.add('hidden');
+            document.getElementById('bottomNav').classList.add('hidden');
+        }
     });
 }
 
-// -- Event Listeners --
+function loadUserData(uid) {
+    // 1. Config
+    subscribeToConfig(uid, (config) => {
+        UI.renderAccounts(); // Re-render when config changes (or accounts update)
+    });
 
-document.getElementById('googleLoginBtn').addEventListener('click', loginWithGoogle);
-document.getElementById('logoutBtn').addEventListener('click', () => { toggleSettings(); logout(); });
-
-document.getElementById('saveBtn').addEventListener('click', async () => {
-    const amount = parseFloat(document.getElementById('amount').value);
-    const dateVal = document.getElementById('dateInput').value;
-    const cat = document.getElementById('category').value;
-    const desc = document.getElementById('description').value || cat;
-
-    // Get Payment Type info
-    const isCard = !document.getElementById('cardSelect').classList.contains('hidden');
-    const paymentType = isCard ? 'Card' : 'Cash';
-    const cardName = isCard ? document.getElementById('cardSelect').value : null;
-
-    if (!amount) { alert("Introdu suma!"); return; }
-
-    const btn = document.getElementById('saveBtn');
-    btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i>"; btn.disabled = true;
-
-    try {
-        const txData = {
-            date: dateVal, amount, category: cat, description: desc, type: state.currentType,
-            paymentType, cardName
-        };
-
-        if (state.editingId) {
-            await updateTransaction(state.currentUser.uid, state.editingId, txData);
-            cancelEdit();
-        } else {
-            await addTransaction(state.currentUser.uid, txData);
-            document.getElementById('amount').value = ''; document.getElementById('description').value = '';
+    // 2. Transactions
+    subscribeToTransactions(uid, (transactions) => {
+        UI.renderAccounts();     // Updates Balances
+        UI.renderTransactions(); // Updates List
+        if (state.currentView === 'analytics') {
+            renderAnalytics(); // Refresh chart if visible
         }
-    } catch (e) {
-        console.error(e);
-        alert("Eroare");
-    }
+    });
+}
 
-    btn.innerHTML = "Salvează"; btn.disabled = false;
+// --- GLOBAL BINDINGS ---
+// Expose functions to window for onclick="" handlers in HTML
+
+window.navigateTo = navigateTo;
+window.openAddModal = UI.openAddModal;
+window.closeAddModal = UI.closeAddModal;
+window.setType = UI.setType;
+window.saveTransaction = UI.saveTransaction;
+window.selectAccount = UI.selectAccount;
+window.triggerImport = UI.triggerImport;
+window.handleImportFile = UI.handleImportFile;
+window.exportData = UI.exportData;
+
+// Analytics
+window.renderAnalytics = renderAnalytics;
+window.changeAnalyticsMode = changeAnalyticsMode;
+window.changeAnalyticsDate = changeAnalyticsDate;
+
+window.toggleSettings = UI.toggleSettings;
+window.renderSettings = UI.renderSettings;
+window.closeSettingsModal = UI.closeSettingsModal;
+window.openEditModal = UI.openEditModal;
+window.changeTab = UI.changeTab;
+window.saveSettings = UI.saveSettings;
+window.deleteAccount = UI.deleteAccount;
+window.deleteCategory = UI.deleteCategory;
+
+// Login/Logout
+document.getElementById('googleLoginBtn').addEventListener('click', () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(e => alert(e.message));
 });
 
-// -- Global Exports for HTML onclick --
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm('Log out?')) signOut(auth);
+});
 
-window.toggleSettings = toggleSettings;
-window.setType = setType;
-window.renderSettingsCats = renderSettingsCats;
-window.cancelEdit = cancelEdit;
-window.togglePaymentMethod = togglePaymentMethod;
+// Dynamic Listener for Account Change (Business Tip Logic)
+document.getElementById('inpAccount').addEventListener('change', () => {
+    UI.checkBusinessFields();
+});
 
-window.editTx = editTx; // Called from renderApp HTML string
-
-window.deleteTx = async (id) => {
-    if (confirm("Ștergi?")) {
-        if (state.editingId === id) cancelEdit();
-        await deleteTransaction(state.currentUser.uid, id);
-    }
-};
-
-window.addNewCategory = async () => {
-    const input = document.getElementById('newCatName');
-    const name = input.value.trim();
-    if (!name) return;
-
-    let updateObj = {};
-    let list = [];
-
-    if (state.settingsTab === 'Expense') {
-        list = [...state.userConfig.expenseCats];
-        if (!list.includes(name)) updateObj = { expenseCats: [...list, name] };
-    } else if (state.settingsTab === 'Income') {
-        list = [...state.userConfig.incomeCats];
-        if (!list.includes(name)) updateObj = { incomeCats: [...list, name] };
-    } else { // Cards
-        list = [...state.userConfig.cards];
-        if (!list.includes(name)) updateObj = { cards: [...list, name] };
-    }
-
-    if (Object.keys(updateObj).length > 0) {
-        await updateConfig(state.currentUser.uid, updateObj);
-    }
-    input.value = '';
-};
-
-window.removeCat = async (name) => {
-    if (!confirm("Ștergi?")) return;
-
-    let updateObj = {};
-    let list = [];
-
-    if (state.settingsTab === 'Expense') {
-        list = [...state.userConfig.expenseCats].filter(c => c !== name);
-        updateObj = { expenseCats: list };
-    } else if (state.settingsTab === 'Income') {
-        list = [...state.userConfig.incomeCats].filter(c => c !== name);
-        updateObj = { incomeCats: list };
-    } else { // Cards
-        list = [...state.userConfig.cards].filter(c => c !== name);
-        updateObj = { cards: list };
-    }
-
-    await updateConfig(state.currentUser.uid, updateObj);
-};
-
-window.exportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.transactionsCache));
-    const node = document.createElement('a'); node.href = dataStr;
-    node.download = "backup.json"; node.click();
-};
+// Start
+initApp();

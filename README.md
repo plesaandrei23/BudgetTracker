@@ -10,26 +10,34 @@ Accesează aplicația aici: **[Link-ul Tău GitHub Pages Aici]**
 
 ---
 
-## ✨ Funcționalități Curente
+## ✨ Funcționalități Curente (v2.0 - Revolut Style Overhaul)
 
-### 📱 Experiență Utilizator
-* **Design Responsive:** Interfață hibridă care arată ca un telefon pe Desktop și ocupă tot ecranul pe Mobil.
-* **Add to Home Screen:** Poate fi instalată ca o aplicație pe iOS și Android (fără App Store).
-* **Dark Mode UI:** Design modern "Slate & Blue" prietenos cu ochii.
+### 📱 Experiență Utilizator Premium
+* **Single Page Application (SPA):** Navigare instantanee fără reîncărcarea paginii.
+* **UI Modern & Dark Mode:** Design inspirat de Revolut, cu carduri "glassmorphism", culori vibrante (Slate/Blue/Emerald) și iconițe intuitive.
+* **Mobile First:** Optimizat perfect pentru telefoane, cu bară de navigare fixă jos și layout ergonomic.
 
-### 💸 Management Financiar
-* **Sincronizare Cloud:** Toate datele sunt salvate instantaneu în Google Firebase. Poți accesa bugetul de pe telefon, laptop sau tabletă simultan.
-* **Autentificare Google:** Login rapid și sigur cu contul tău Google.
-* **Adăugare Rapidă:** Formular simplificat pentru tranzacții (Cash sau Card).
-* **Editare & Ștergere:** Ai greșit suma? Poți edita sau șterge orice tranzacție oricând.
+### 💸 Management Financiar Avansat
+* **Conturi Multiple:** Suport pentru Cash, BT Personal, Revolut, Business (PFA) și Business Cash.
+* **Logică de Business:** Calcul automat al "Tip Amount" pentru veniturile PFA și separarea banilor de business vs personali.
+* **Transferuri:** Funcție dedicată pentru a muta bani între conturi (ex: Top-up Revolut din BT).
+* **Tranzacții Inteligente:** Recunoaștere automată a tipului (Venit/Cheltuială/Transfer) și colorare specifică.
 
-### 📊 Analiză & Organizare
-* **Dashboard:** Balanță totală, total venituri și total cheltuieli la vedere.
-* **Grafic Vizual:** Diagramă tip "Doughnut" (Chart.js) pentru a vedea pe ce se duc banii.
-* **Categorii Personalizate:** Poți adăuga propriile categorii (ex: "Netflix", "Shaorma", "Bursa") din meniul de Setări.
+### 📊 Analiză & Statistici (Redesign Complet)
+* **Navigare în Timp:** Vezi cheltuielile pe Săptămână (Week), Lună (Month) sau An (Year) cu butoane de navigare (< >).
+* **Grafice Interactive:**
+    * **Week View:** Grafic cu bare zilnice (Luni-Duminică).
+    * **Month View:** Grafic cu bare săptămânale (W1-W5).
+    * **Year View:** Grafic lunar (Ian-Dec).
+* **Breakdown Detaliat:** Lista cheltuielilor pe categorii cu bare de progres procentuale.
+* **Insigne Vizuale:** Carduri "Net Worth" și "Procent Cheltuit" animate.
 
-### 🛡️ Siguranță & Date
-* **Backup Hibrid:** Funcție de Export/Import JSON pentru a salva datele local, independent de Cloud.
+### 🎯 Goals (În Lucru)
+* **Placeholder:** Secțiune nouă în meniu pentru setarea obiectivelor financiare și alocarea economiilor (Coming Soon).
+
+### 🛡️ Date & Import/Export
+* **Backup JSON:** Exportă toate datele într-un fișier local pentru siguranță.
+* **Import Inteligent:** Importă date din backup, cu detecția duplicatelor și validare.
 
 ---
 

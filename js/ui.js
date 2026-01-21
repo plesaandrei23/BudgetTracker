@@ -11,8 +11,8 @@ export function updateNavState(view) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         const isTarget = btn.dataset.target === view;
         btn.classList.toggle('text-amber-500', isTarget);
-        btn.classList.toggle('text-slate-400', !isTarget);
-        btn.classList.toggle('dark:text-slate-500', !isTarget);
+        btn.classList.toggle('text-neutral-400', !isTarget);
+        btn.classList.toggle('dark:text-neutral-500', !isTarget);
     });
 
     if (view === 'analytics') renderAnalytics('week');
@@ -45,9 +45,9 @@ export function renderAccounts() {
     const total = Object.values(balances).reduce((a, b) => a + b, 0);
 
     let html = `
-        <div onclick="selectAccount('all')" class="flex-shrink-0 w-36 h-24 bg-white dark:bg-slate-800 rounded-2xl p-4 border ${state.selectedAccount === 'all' ? 'border-amber-500' : 'border-slate-200 dark:border-slate-700'} flex flex-col justify-between cursor-pointer snap-start shadow-sm">
-            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Total Net Worth</div>
-            <div class="text-lg font-bold text-slate-900 dark:text-white">${total.toFixed(2)}</div>
+        <div onclick="selectAccount('all')" class="flex-shrink-0 w-36 h-24 bg-white dark:bg-neutral-800 rounded-2xl p-4 border ${state.selectedAccount === 'all' ? 'border-amber-500' : 'border-neutral-200 dark:border-neutral-700'} flex flex-col justify-between cursor-pointer snap-start shadow-sm">
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 uppercase font-bold">Total Net Worth</div>
+            <div class="text-lg font-bold text-neutral-900 dark:text-white">${total.toFixed(2)}</div>
         </div>
     `;
 
@@ -55,12 +55,12 @@ export function renderAccounts() {
         const bal = balances[acc.id] || 0;
         const isSel = state.selectedAccount === acc.id;
         html += `
-            <div onclick="selectAccount('${acc.id}')" class="flex-shrink-0 w-36 h-24 bg-white dark:bg-slate-800 rounded-2xl p-4 border ${isSel ? 'border-amber-500' : 'border-slate-200 dark:border-slate-700'} flex flex-col justify-between cursor-pointer snap-start shadow-sm">
+            <div onclick="selectAccount('${acc.id}')" class="flex-shrink-0 w-36 h-24 bg-white dark:bg-neutral-800 rounded-2xl p-4 border ${isSel ? 'border-amber-500' : 'border-neutral-200 dark:border-neutral-700'} flex flex-col justify-between cursor-pointer snap-start shadow-sm">
                 <div class="flex justify-between items-start">
-                    <span class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold truncate pr-2">${acc.name}</span>
-                    <i class="fa-solid ${acc.icon} ${acc.color === 'text-white' ? 'text-slate-900 dark:text-white' : acc.color}"></i>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400 uppercase font-bold truncate pr-2">${acc.name}</span>
+                    <i class="fa-solid ${acc.icon} ${acc.color === 'text-white' ? 'text-neutral-900 dark:text-white' : acc.color}"></i>
                 </div>
-                <div class="text-lg font-bold text-slate-900 dark:text-white">${bal.toFixed(2)}</div>
+                <div class="text-lg font-bold text-neutral-900 dark:text-white">${bal.toFixed(2)}</div>
             </div>
         `;
     });
@@ -88,7 +88,7 @@ export function renderTransactions() {
     }
 
     if (data.length === 0) {
-        list.innerHTML = `<div class="text-center text-slate-500 py-10">No transactions found.</div>`;
+        list.innerHTML = `<div class="text-center text-neutral-500 py-10">No transactions found.</div>`;
         return;
     }
 
@@ -103,18 +103,18 @@ export function renderTransactions() {
 
     Object.values(groups).forEach(group => {
         const header = document.createElement('div');
-        header.className = "sticky top-0 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur z-10 py-2 px-1 text-xs font-bold text-slate-500 uppercase";
+        header.className = "sticky top-0 bg-neutral-50/95 dark:bg-neutral-900/95 backdrop-blur z-10 py-2 px-1 text-xs font-bold text-neutral-500 uppercase";
         header.innerText = group.label;
         list.appendChild(header);
 
         const groupDiv = document.createElement('div');
-        groupDiv.className = "bg-white dark:bg-slate-800 rounded-2xl overflow-hidden mb-4 border border-slate-200 dark:border-slate-700 shadow-sm";
+        groupDiv.className = "bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden mb-4 border border-neutral-200 dark:border-neutral-700 shadow-sm";
 
         group.items.forEach(t => {
             const isExp = t.type === 'Expense';
             const isInc = t.type === 'Income';
 
-            let color = 'text-slate-900 dark:text-white';
+            let color = 'text-neutral-900 dark:text-white';
             let icon = 'fa-bag-shopping';
             let sign = '';
 
@@ -132,20 +132,20 @@ export function renderTransactions() {
             }
 
             const div = document.createElement('div');
-            div.className = "p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition border-b border-slate-200 dark:border-slate-700 last:border-0 cursor-pointer";
+            div.className = "p-4 flex items-center gap-4 hover:bg-neutral-50 dark:hover:bg-white/5 transition border-b border-neutral-200 dark:border-neutral-700 last:border-0 cursor-pointer";
             div.onclick = () => openAddModal(t.id); // EDIT MODE
 
             div.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300">
+                <div class="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center text-neutral-400 dark:text-neutral-300">
                     <i class="fa-solid ${icon}"></i>
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between">
-                        <span class="font-bold text-sm text-slate-800 dark:text-slate-200">${t.description || t.category}</span>
+                        <span class="font-bold text-sm text-neutral-800 dark:text-neutral-200">${t.description || t.category}</span>
                         <span class="font-bold text-sm ${color}">${sign}${t.amount.toFixed(2)}</span>
                     </div>
                      <div class="flex justify-between mt-0.5">
-                        <span class="text-xs text-slate-500">${t.category}</span>
+                        <span class="text-xs text-neutral-500">${t.category}</span>
                         ${t.tipAmount ? `<span class="text-[10px] bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 px-1 rounded">Tip: ${t.tipAmount}</span>` : ''}
                     </div>
                 </div>
@@ -238,8 +238,8 @@ export function setType(type) {
     const map = { Expense: 'btnEp', Income: 'btnIn', Transfer: 'btnTr' };
     Object.keys(map).forEach(k => {
         const el = document.getElementById(map[k]);
-        if (k === type) el.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white dark:bg-slate-800 shadow text-slate-900 dark:text-white transition-all";
-        else el.className = "flex-1 py-2 rounded-lg text-sm font-bold text-slate-400 dark:text-slate-500 transition-all";
+        if (k === type) el.className = "flex-1 py-2 rounded-lg text-sm font-bold bg-white dark:bg-neutral-800 shadow text-neutral-900 dark:text-white transition-all";
+        else el.className = "flex-1 py-2 rounded-lg text-sm font-bold text-neutral-400 dark:text-neutral-500 transition-all";
     });
 
     // Visibility
@@ -262,7 +262,7 @@ function renderCategoryList(type) {
     cats.forEach(c => {
         const isActive = c === currentCat;
         const btn = document.createElement('button');
-        btn.className = `flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition ${isActive ? 'bg-amber-500 text-black border-transparent' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-transparent'}`;
+        btn.className = `flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border transition ${isActive ? 'bg-amber-500 text-black border-transparent' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 border-transparent'}`;
         btn.innerText = c;
         btn.onclick = (e) => {
             e.preventDefault(); // prevent form issues
@@ -356,17 +356,17 @@ export function renderSettingsUI() {
 
     const div = document.createElement('div');
     div.id = 'manageConfigDiv';
-    div.className = "bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 mt-4";
+    div.className = "bg-white dark:bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 mt-4";
     div.innerHTML = `
-        <div class="p-4 border-b border-slate-200 dark:border-slate-700 font-bold text-sm text-slate-500 uppercase">Configuration</div>
-        <button onclick="addConfigItem('expenseCats')" class="w-full flex justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition border-b border-slate-200 dark:border-slate-700">
-            <span class="text-slate-900 dark:text-slate-200">Add Expense Category</span> <i class="fa-solid fa-plus text-amber-500"></i>
+        <div class="p-4 border-b border-neutral-200 dark:border-neutral-700 font-bold text-sm text-neutral-500 uppercase">Configuration</div>
+        <button onclick="addConfigItem('expenseCats')" class="w-full flex justify-between p-4 hover:bg-neutral-50 dark:hover:bg-white/5 transition border-b border-neutral-200 dark:border-neutral-700">
+            <span class="text-neutral-900 dark:text-neutral-200">Add Expense Category</span> <i class="fa-solid fa-plus text-amber-500"></i>
         </button>
-        <button onclick="addConfigItem('incomeCats')" class="w-full flex justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition border-b border-slate-200 dark:border-slate-700">
-            <span class="text-slate-900 dark:text-slate-200">Add Income Category</span> <i class="fa-solid fa-plus text-amber-500"></i>
+        <button onclick="addConfigItem('incomeCats')" class="w-full flex justify-between p-4 hover:bg-neutral-50 dark:hover:bg-white/5 transition border-b border-neutral-200 dark:border-neutral-700">
+            <span class="text-neutral-900 dark:text-neutral-200">Add Income Category</span> <i class="fa-solid fa-plus text-amber-500"></i>
         </button>
-        <button onclick="addConfigItem('accounts')" class="w-full flex justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition">
-            <span class="text-slate-900 dark:text-slate-200">Add New Account</span> <i class="fa-solid fa-plus text-amber-500"></i>
+        <button onclick="addConfigItem('accounts')" class="w-full flex justify-between p-4 hover:bg-neutral-50 dark:hover:bg-white/5 transition">
+            <span class="text-neutral-900 dark:text-neutral-200">Add New Account</span> <i class="fa-solid fa-plus text-amber-500"></i>
         </button>
     `;
     container.appendChild(div);
@@ -381,7 +381,7 @@ window.addConfigItem = async (key) => {
 
     if (key === 'accounts') {
         const id = name.toLowerCase().replace(/\s+/g, '_');
-        newConfig.accounts.push({ id, name, type: 'bank', icon: 'fa-piggy-bank', color: 'text-slate-900 dark:text-white' });
+        newConfig.accounts.push({ id, name, type: 'bank', icon: 'fa-piggy-bank', color: 'text-neutral-900 dark:text-white' });
     } else {
         newConfig[key].push(name);
     }

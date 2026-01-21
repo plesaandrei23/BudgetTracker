@@ -15,9 +15,9 @@ function updateModeUI(mode) {
         const btn = document.getElementById(`btn-mode-${m}`);
         if (btn) {
             if (m === mode) {
-                btn.className = "flex-1 py-2 rounded-lg bg-white dark:bg-neutral-700 text-slate-900 dark:text-white shadow-md transition-all font-bold";
+                btn.className = "flex-1 py-2 rounded-lg bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-md transition-all font-bold";
             } else {
-                btn.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-neutral-500 hover:text-slate-900 dark:hover:text-white transition-all";
+                btn.className = "flex-1 py-2 rounded-lg text-neutral-500 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-all";
             }
         }
     });
@@ -209,30 +209,30 @@ export function renderAnalytics() {
             </div>
 
             <!-- BAR CHART -->
-            <div class="bg-white dark:bg-neutral-800 rounded-3xl p-5 border border-slate-200 dark:border-neutral-700/50 shadow-xl">
+            <div class="bg-white dark:bg-neutral-800 rounded-3xl p-5 border border-neutral-200 dark:border-neutral-700/50 shadow-xl">
                 <div class="flex justify-between items-end h-40 gap-2 px-1">
                     ${chartData.values.map((val, i) => `
                         <div class="flex flex-col items-center justify-end w-full group relative h-full">
                             <div class="peer w-full max-w-[16px] min-h-[4px] rounded-t-sm transition-all duration-500 ease-out 
-                                ${val > 0 ? 'bg-gradient-to-t from-amber-600 to-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-slate-200 dark:bg-neutral-700/50'}"
+                                ${val > 0 ? 'bg-gradient-to-t from-amber-600 to-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-neutral-200 dark:bg-neutral-700/50'}"
                                 style="height: ${val > 0 ? (val / maxVal) * 100 : 2}%">
                             </div>
-                            <div class="absolute -top-8 bg-slate-900 dark:bg-neutral-900 border border-slate-700 dark:border-neutral-700 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 peer-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none transform translate-y-2 peer-hover:translate-y-0">
+                            <div class="absolute -top-8 bg-neutral-900 dark:bg-neutral-900 border border-neutral-700 dark:border-neutral-700 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 peer-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none transform tranneutral-y-2 peer-hover:tranneutral-y-0">
                                 ${val.toFixed(0)} RON
                             </div>
-                            <div class="text-[10px] font-bold text-slate-400 dark:text-neutral-500 mt-2">${chartData.labels[i]}</div>
+                            <div class="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 mt-2">${chartData.labels[i]}</div>
                         </div>
                     `).join('')}
                 </div>
             </div>
 
             <!-- PROGRESS LINE -->
-            <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 border border-slate-200 dark:border-neutral-700/50">
-                <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-neutral-400 mb-2">
+            <div class="bg-white dark:bg-neutral-800 rounded-2xl p-4 border border-neutral-200 dark:border-neutral-700/50">
+                <div class="flex justify-between text-xs font-bold text-neutral-500 dark:text-neutral-400 mb-2">
                     <span>Procent Cheltuit</span>
                     <span>${pct.toFixed(0)}% din Venituri</span>
                 </div>
-                <div class="h-3 bg-slate-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+                <div class="h-3 bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000" style="width: ${Math.min(pct, 100)}%"></div>
                 </div>
             </div>
@@ -248,21 +248,21 @@ export function renderAnalytics() {
             const catPct = expense > 0 ? (amt / expense) * 100 : 0;
 
             const div = document.createElement('div');
-            div.className = "flex items-center gap-3 p-3 active:bg-slate-50 dark:active:bg-neutral-800 rounded-xl transition";
+            div.className = "flex items-center gap-3 p-3 active:bg-neutral-50 dark:active:bg-neutral-800 rounded-xl transition";
             div.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 flex items-center justify-center text-slate-400 dark:text-neutral-400">
+                <div class="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center text-neutral-400 dark:text-neutral-400">
                 <i class="fa-solid fa-tag"></i> 
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white">${cat}</span>
-                        <span class="text-sm font-bold text-slate-900 dark:text-white">${amt.toFixed(2)} <span class="text-xs text-slate-500 dark:text-neutral-500">RON</span></span>
+                        <span class="text-sm font-bold text-neutral-900 dark:text-white">${cat}</span>
+                        <span class="text-sm font-bold text-neutral-900 dark:text-white">${amt.toFixed(2)} <span class="text-xs text-neutral-500 dark:text-neutral-500">RON</span></span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="flex-1 h-1.5 bg-slate-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                        <div class="flex-1 h-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                             <div class="h-full bg-amber-500 rounded-full" style="width: ${catPct}%"></div>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-500 dark:text-neutral-500">${catPct.toFixed(0)}%</span>
+                        <span class="text-[10px] font-bold text-neutral-500 dark:text-neutral-500">${catPct.toFixed(0)}%</span>
                     </div>
                 </div>
             `;

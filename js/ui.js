@@ -317,6 +317,12 @@ export async function saveTransaction() {
         data.tipAmount = tip;
     }
 
+    // UI Feedback
+    const btn = document.getElementById('saveTxBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
     try {
         if (state.editingId) {
             await updateTransaction(state.currentUser.uid, state.editingId, data);
@@ -327,6 +333,9 @@ export async function saveTransaction() {
     } catch (e) {
         console.error(e);
         alert("Error saving: " + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 

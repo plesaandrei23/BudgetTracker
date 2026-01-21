@@ -50,6 +50,14 @@ export function subscribeToTransactions(uid, callback) {
         snapshot.forEach((doc) => {
             transactions.push({ id: doc.id, ...doc.data() });
         });
+
+        // Client-side sort to ensure order within same date (Newest First)
+        transactions.sort((a, b) => {
+            const dateDiff = b.date.localeCompare(a.date);
+            if (dateDiff !== 0) return dateDiff;
+            return (b.createdAt || '').localeCompare(a.createdAt || '');
+        });
+
         setState('transactionsCache', transactions);
 
         // Run migration if needed
